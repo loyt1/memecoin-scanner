@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memecoin Scanner</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b0d12;--panel:#12151d;--panel2:#171b25;--line:#232838;--txt:#e7e9ee;--mut:#8a91a5;
+  --up:#22c55e;--down:#ef4444;--acc:#8b5cf6;--warn:#f59e0b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 Inter,system-ui,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h1{font-size:22px;margin:0;letter-spacing:-.02em}
+h1 span{color:var(--acc)}
+.sub{color:var(--mut);font-size:13px}
+h2{font-size:15px;margin:0 0 12px;font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls label{color:var(--mut);font-size:12px;display:flex;flex-direction:column;gap:4px}
+select,input{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi .l{color:var(--mut);font-size:12px}
+.kpi .v{font:600 22px/1.3 "JetBrains Mono",monospace;margin-top:4px}
+.up{color:var(--up)}.down{color:var(--down)}.mut{color:var(--mut)}
+.chartbox{position:relative;height:300px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--mut);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-family:"JetBrains Mono",monospace;white-space:nowrap}
+.scroll{overflow-x:auto}
+a{color:var(--acc);text-decoration:none}
+.tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
+.tag.B{color:#60a5fa}.tag.G{color:#c084fc}
+.journal{max-height:520px;overflow-y:auto}
+.ev{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ev .t{color:var(--mut);font:12px "JetBrains Mono",monospace;min-width:92px}
+.ev .d{flex:1}
+.ev .why{color:var(--mut);font-size:12px;margin-top:2px}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none}
+.empty{color:var(--mut);padding:18px 0;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.note{color:var(--mut);font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Memecoin <span>Scanner</span></h1>
+      <div class="sub">Paper trading des stratégies de retracement · Solana · aucune vraie transaction</div>
+    </div>
+    <div class="sub" id="maj">Chargement…</div>
+  </header>
+
+  <div class="panel controls">
+    <label>Stratégie
+      <select id="f-strat"><option value="BG">B + G</option><option value="B">B (-60 %)</option><option value="G" selected>G (-70 %)</option></select>
+    </label>
+    <label>Sortie
+      <select id="f-sortie"></select>
+    </label>
+    <label>Mise par trade
+      <select id="f-mise"><option value="0.03">3 % du capital</option><option value="0.05" selected>5 % du capital</option><option value="0.1">10 % du capital</option></select>
+    </label>
+    <label>Capital de départ
+      <input id="f-cap" type="number" value="5000" min="100" step="100" style="width:110px">
+    </label>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">Capital actuel</div><div class="v" id="k-eq">–</div></div>
+    <div class="kpi"><div class="l">Profit / perte</div><div class="v" id="k-pnl">–</div></div>
+    <div class="kpi"><div class="l">Trades clôturés</div><div class="v" id="k-n">–</div></div>
+    <div class="kpi"><div class="l">Trades gagnants</div><div class="v" id="k-win">–</div></div>
+    <div class="kpi"><div class="l">Gain moyen par trade</div><div class="v" id="k-avg">–</div></div>
+    <div class="kpi"><div class="l">Positions ouvertes</div><div class="v" id="k-open">–</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Courbe du capital</h2>
+    <div class="chartbox"><canvas id="c-eq"></canvas></div>
+    <div class="note">Le dernier point inclut la valeur actuelle des positions ouvertes. Frais de 3 % déduits à chaque trade. Heures de Bangkok (UTC+7).</div>
+  </div>
+
+  <div class="panel">
+    <h2>Comparaison de toutes les variantes (même capital, même mise)</h2>
+    <div class="scroll"><table id="t-comp"></table></div>
+    <div class="note">Référence backtest du 8 octobre (sortie 50/x2, stop -60 %) : B +17 % par trade, G +31 % par trade.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2>Journal des décisions</h2>
+      <div class="journal" id="journal"></div>
+    </div>
+    <div class="panel">
+      <h2>Positions ouvertes</h2>
+      <div class="scroll"><table id="t-open"></table></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Tous les trades</h2>
+    <div class="scroll"><table id="t-all"></table></div>
+  </div>
+</div>
+
+<script>
+const TZ = 'Asia/Bangkok';
+const fmtT = ts => new Date(ts * 1000).toLocaleString('fr-FR', {timeZone: TZ, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'});
+const usd = v => (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('fr-FR', {maximumFractionDigits: 0});
+const pct = v => (v > 0 ? '+' : '') + (v * 100).toFixed(1) + ' %';
+const mc = v => v == null ? '–' : (v / 1e6).toFixed(2) + ' M$';
+const cls = v => v > 0 ? 'up' : v < 0 ? 'down' : 'mut';
+const $ = id => document.getElementById(id);
+let DATA = null, chart = null;
+
+// Rejoue tous les trades d'une stratégie/sortie avec un portefeuille fictif
+function simuler(trades, sortie, mise, cap, frais) {
+  const evs = [];
+  for (const p of trades) {
+    const r = p.res[sortie];
+    evs.push({t: p.entree_t, k: 'in', p});
+    for (const e of (r.evts || [])) evs.push({t: e.t, k: 'out', p, e});
+  }
+  evs.sort((a, b) => a.t - b.t || (a.k === 'in' ? 1 : -1));
+  let cash = cap; const taille = new Map(), courbe = [], journal = [];
+  const ouvert = () => [...taille.entries()].reduce((s, [p, x]) => s + x.size * x.reste, 0);
+  courbe.push({x: (evs[0]?.t || DATA.maj) - 3600, y: cap});
+  for (const ev of evs) {
+    if (ev.k === 'in') {
+      const eq = cash + ouvert();
+      const size = eq * mise;
+      if (size > cash) { journal.push({t: ev.t, type: 'skip', p: ev.p}); continue; }
+      cash -= size * (1 + frais);
+      taille.set(ev.p, {size, reste: 1});
+      journal.push({t: ev.t, type: 'achat', p: ev.p, size});
+    } else {
+      const x = taille.get(ev.p); if (!x) continue;
+      const rendu = x.size * ev.e.part * (1 + ev.e.gain);
+      cash += rendu; x.reste -= ev.e.part;
+      journal.push({t: ev.t, type: ev.e.type, p: ev.p, e: ev.e, rendu, size: x.size});
+      if (x.reste <= 1e-6) taille.delete(ev.p);
+    }
+    courbe.push({x: ev.t, y: cash + ouvert()});
+  }
+  // valeur actuelle des positions ouvertes (prix du dernier relevé)
+  let latent = 0;
+  for (const [p, x] of taille) latent += x.size * x.reste * (1 + (p.res[sortie].gain_latent || 0));
+  const eq = cash + latent;
+  courbe.push({x: DATA.maj, y: eq});
+  const fermes = trades.filter(p => p.res[sortie].ferme && taille.get(p) === undefined && journal.some(j => j.p === p && j.type === 'achat'));
+  const pnls = fermes.map(p => p.res[sortie].pnl);
+  return {eq, courbe, journal, n: pnls.length, win: pnls.filter(v => v > 0).length, avg: pnls.length ? pnls.reduce((a, b) => a + b, 0) / pnls.length : null, ouvertes: taille.size};
+}
+
+function filtre(strat) { return DATA.trades.filter(p => strat.includes(p.strat)); }
+
+function rendre() {
+  const strat = $('f-strat').value, sortie = $('f-sortie').value, mise = +$('f-mise').value, cap = +$('f-cap').value || 5000;
+  const s = simuler(filtre(strat), sortie, mise, cap, DATA.frais);
+  const pnl = s.eq - cap;
+  $('k-eq').textContent = usd(s.eq);
+  $('k-pnl').innerHTML = `<span class="${cls(pnl)}">${usd(pnl)} (${pct(pnl / cap)})</span>`;
+  $('k-n').textContent = s.n;
+  $('k-win').textContent = s.n ? Math.round(100 * s.win / s.n) + ' %' : '–';
+  $('k-avg').innerHTML = s.avg == null ? '–' : `<span class="${cls(s.avg)}">${pct(s.avg)}</span>`;
+  $('k-open').textContent = s.ouvertes;
+
+  // courbe
+  const pts = s.courbe.map(p => ({x: p.x * 1000, y: Math.round(p.y * 100) / 100}));
+  const couleur = pnl >= 0 ? '#22c55e' : '#ef4444';
+  const cfg = {type: 'line', data: {datasets: [{data: pts, borderColor: couleur, backgroundColor: couleur + '22', fill: true, stepped: 'before', pointRadius: 0, borderWidth: 2},
+    {data: [{x: pts[0].x, y: cap}, {x: pts[pts.length - 1].x, y: cap}], borderColor: '#8a91a5', borderDash: [4, 4], pointRadius: 0, borderWidth: 1}]},
+    options: {responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+      plugins: {legend: {display: false}, tooltip: {callbacks: {title: i => fmtT(i[0].parsed.x / 1000), label: i => usd(i.parsed.y)}}},
+      scales: {x: {type: 'linear', ticks: {color: '#8a91a5', callback: v => fmtT(v / 1000), maxTicksLimit: 7}, grid: {color: '#1c2130'}},
+        y: {ticks: {color: '#8a91a5', callback: v => usd(v)}, grid: {color: '#1c2130'}}}}};
+  if (chart) chart.destroy();
+  chart = new Chart($('c-eq'), cfg);
+
+  // comparaison
+  let h = '<tr><th>Stratégie</th><th>Sortie</th><th>Capital final</th><th>Profit</th><th>Trades clôturés</th><th>Gagnants</th><th>Gain moyen</th><th>Ouvertes</th></tr>';
+  for (const st of ['B', 'G']) for (const so of Object.keys(DATA.sorties)) {
+    const r = simuler(filtre(st), so, mise, cap, DATA.frais), d = r.eq - cap;
+    h += `<tr><td><span class="tag ${st}">${st}</span></td><td>${nomSortie(so)}</td><td class="n">${usd(r.eq)}</td><td class="n ${cls(d)}">${usd(d)} (${pct(d / cap)})</td>
+      <td class="n">${r.n}</td><td class="n">${r.n ? Math.round(100 * r.win / r.n) + ' %' : '–'}</td><td class="n ${cls(r.avg || 0)}">${r.avg == null ? '–' : pct(r.avg)}</td><td class="n">${r.ouvertes}</td></tr>`;
+  }
+  $('t-comp').innerHTML = h;
+
+  // journal
+  const J = [...s.journal].sort((a, b) => b.t - a.t);
+  $('journal').innerHTML = J.length ? J.map(j => {
+    const p = j.p, sig = p.sig || {};
+    if (j.type === 'achat') {
+      const why = [`sommet ${mc(p.peak)} → ${p.ordre_limite ? 'ordre limite' : 'achat au marché'} à ${mc(p.prix_entree)}`, `pump x${p.pump_x} en ${p.pump_h} h`, `chute en ${p.h_vers_entree} h`,
+        `baleines ${sig.baleines_achat_usd ?? '?'} $ achetés / ${sig.baleines_vente_usd ?? '?'} $ vendus`, `KOLs ${sig.kol_achats ?? '?'} achats / ${sig.kol_ventes ?? '?'} ventes${sig.kol_noms ? ' (' + sig.kol_noms + ')' : ''}`,
+        `holders ${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}`].join(' · ');
+      return ev(j.t, '#8b5cf6', `<b>Achat</b> <a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a> <span class="tag ${p.strat}">${p.strat}</span> · ${usd(j.size)}`, why);
+    }
+    if (j.type === 'skip') return ev(j.t, '#8a91a5', `Signal ignoré : ${esc(p.sym)} (capital insuffisant)`, '');
+    const g = j.e.gain, c = j.type === 'stop' ? '#ef4444' : g >= 0 ? '#22c55e' : '#f59e0b';
+    const quoi = j.type === 'stop' ? 'Stop touché' : j.type === 'sortie 72 h' ? 'Sortie après 72 h' : `Vente ${j.type}`;
+    return ev(j.t, c, `<b>${quoi}</b> ${esc(p.sym)} <span class="tag ${p.strat}">${p.strat}</span> · ${Math.round(j.e.part * 100)} % de la position à <span class="${cls(g)}">${pct(g)}</span>`, `récupéré ${usd(j.rendu)} sur ${usd(j.size * j.e.part)} investis`);
+  }).join('') : '<div class="empty">Aucune décision pour l\'instant. Le bot attend un retracement qui coche toutes les cases.</div>';
+
+  // positions ouvertes
+  const ouv = filtre(strat).filter(p => !p.res[sortie].ferme);
+  $('t-open').innerHTML = ouv.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>MC entrée</th><th>Gain latent</th><th>Reste</th></tr>' + ouv.map(p => {
+    const r = p.res[sortie];
+    return `<tr><td><a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a></td><td><span class="tag ${p.strat}">${p.strat}</span></td><td class="n">${fmtT(p.entree_t)}</td><td class="n">${mc(p.prix_entree)}</td><td class="n ${cls(r.gain_latent || 0)}">${pct(r.gain_latent || 0)}</td><td class="n">${Math.round((r.reste ?? 1) * 100)} %</td></tr>`;
+  }).join('') : '<tr><td class="empty">Aucune position ouverte.</td></tr>';
+
+  // tous les trades
+  const tous = filtre(strat).sort((a, b) => b.entree_t - a.entree_t);
+  $('t-all').innerHTML = tous.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>Sommet</th><th>MC entrée</th><th>Pump</th><th>Résultat</th><th>Plus haut</th><th>Plus bas</th><th>Baleines A/V</th><th>KOLs A/V</th><th>Holders</th><th>Statut</th></tr>' + tous.map(p => {
+    const r = p.res[sortie], sig = p.sig || {};
+    return `<tr><td><a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a></td><td><span class="tag ${p.strat}">${p.strat}</span></td><td class="n">${fmtT(p.entree_t)}</td><td class="n">${mc(p.peak)}</td><td class="n">${mc(p.prix_entree)}</td>
+      <td class="n">x${p.pump_x}</td><td class="n ${cls(r.pnl)}">${pct(r.pnl)}</td><td class="n up">${p.haut != null ? pct(p.haut) : '–'}</td><td class="n down">${p.bas != null ? pct(p.bas) : '–'}</td>
+      <td class="n">${sig.baleines_achat_usd ?? '?'} / ${sig.baleines_vente_usd ?? '?'}</td><td class="n">${sig.kol_achats ?? '?'} / ${sig.kol_ventes ?? '?'}</td><td class="n">${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}</td><td>${r.ferme ? 'clôturé' : '<span class="up">ouvert</span>'}</td></tr>`;
+  }).join('') : '<tr><td class="empty">Aucun trade pour l\'instant.</td></tr>';
+}
+
+function ev(t, couleur, txt, why) { return `<div class="ev"><div class="t">${fmtT(t)}</div><div class="dot" style="background:${couleur}"></div><div class="d">${txt}${why ? `<div class="why">${why}</div>` : ''}</div></div>`; }
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
+function nomSortie(k) { const v = DATA.sorties[k]; return v.tps.map(t => '+' + Math.round(t[0] * 100) + ' %').join(' / ') + ', stop -' + Math.round(v.sl * 100) + ' %'; }
+
+async function charger() {
+  try {
+    const r = await fetch('data/tableau.json?_=' + Date.now(), {cache: 'no-store'});
+    DATA = await r.json();
+    const sel = $('f-sortie'), garde = sel.value;
+    sel.innerHTML = Object.keys(DATA.sorties).map(k => `<option value="${k}">${nomSortie(k)}</option>`).join('');
+    if (garde) sel.value = garde;
+    const age = Math.round((Date.now() / 1000 - DATA.maj) / 60);
+    $('maj').innerHTML = `Dernier relevé : ${fmtT(DATA.maj)} (il y a ${age} min) · ${DATA.tokens_suivis} tokens suivis`;
+    rendre();
+  } catch (e) { $('maj').textContent = 'Données indisponibles pour le moment.'; }
+}
+for (const id of ['f-strat', 'f-sortie', 'f-mise', 'f-cap']) $(id).addEventListener('change', () => DATA && rendre());
+charger(); setInterval(charger, 60000);
+</script>
+</body>
+</html>

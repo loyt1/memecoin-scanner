@@ -236,20 +236,29 @@ def evaluer(pos, u, maintenant):
         r = pos["res"][nom]
         if r["ferme"]:
             continue
-        reste, pnl, k = 1.0, 0.0, 0
+        # evts : chaque vente partielle ou totale, avec l'heure, la part vendue et le gain
+        reste, pnl, k, evts = 1.0, 0.0, 0, []
         for x in pts:
             if x[1] <= ent * (1 - v["sl"]):
+                evts.append({"t": x[0], "type": "stop", "part": round(reste, 4), "gain": -v["sl"]})
                 pnl += reste * -v["sl"]; reste = 0; break
             while k < len(v["tps"]) and x[1] >= ent * (1 + v["tps"][k][0]):
-                f = min(reste, v["tps"][k][1]); pnl += f * v["tps"][k][0]; reste -= f; k += 1
+                f = min(reste, v["tps"][k][1]); pnl += f * v["tps"][k][0]; reste -= f
+                evts.append({"t": x[0], "type": f"palier {k + 1}", "part": round(f, 4), "gain": v["tps"][k][0]})
+                k += 1
             if reste <= 1e-9:
                 break
         dernier = pts[-1][1] / ent - 1 if pts else 0
+        if reste > 1e-9 and fini:
+            evts.append({"t": pts[-1][0] if pts else maintenant, "type": "sortie 72 h", "part": round(reste, 4),
+                         "gain": round(dernier, 4)})
+        r["evts"], r["reste"], r["gain_latent"] = evts, round(reste, 4), round(dernier, 4)
         if reste <= 1e-9 or fini:
-            r.update({"ferme": True, "pnl": round(pnl + reste * dernier - FRAIS, 4)})
+            r.update({"ferme": True, "pnl": round(pnl + reste * dernier - FRAIS, 4), "t_fin": evts[-1]["t"] if evts else maintenant})
         else:
             r["pnl"] = round(pnl + reste * dernier - FRAIS, 4)
     if pts:
+        pos["mc_actuel"] = pts[-1][1]
         pos["haut"] = round(max(x[1] for x in pts) / ent - 1, 3)
         pos["bas"] = round(min(x[1] for x in pts) / ent - 1, 3)
         pos["nouveau_sommet"] = any(x[1] > pos["peak"] for x in pts)
@@ -286,6 +295,18 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
                  f"{s['baleines_achat_usd']}/{s['baleines_vente_usd']} $ | {s['kol_achats']}/{s['kol_ventes']} | "
                  f"{p.get('holders_40')} → {s['holders']} | {statut} |")
     open(os.path.join(ICI, "RAPPORT.md"), "w").write("\n".join(L) + "\n")
+
+
+def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel):
+    """Fichier léger lu par le site (tableau de bord Vercel)."""
+    champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
+              "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
+              "nouveau_sommet", "mc_actuel")
+    trades = [{k: p.get(k) for k in champs} for p in fermees + positions]
+    json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
+               "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"]} for k, v in SORTIES.items()},
+               "duree_max_h": DUREE_MAX_H, "trades": trades},
+              open(os.path.join(DATA, "tableau.json"), "w"), separators=(",", ":"))
 
 
 def main():
@@ -344,6 +365,7 @@ def main():
         if all(v["ferme"] for v in p["res"].values()) or maintenant > p["entree_t"] + (DUREE_MAX_H + 6) * 3600:
             for v in p["res"].values():
                 v["ferme"] = True
+                v.setdefault("t_fin", maintenant)
             fermees.append(p)
             ajouter_csv("sorties.csv", {"date_entree": iso(p["entree_t"]), "sym": p["sym"], "token": p["token"],
                                         "strat": p["strat"], **{k: v["pnl"] for k, v in p["res"].items()},
@@ -356,6 +378,7 @@ def main():
     sauver("positions.json", restantes)
     sauver("fermees.json", fermees)
     rapport(restantes, fermees, maintenant, len(univ), n_rel)
+    tableau_de_bord(restantes, fermees, maintenant, len(univ), n_rel)
     print(f"univers {len(univ)}, relevés {n_rel}, ouvertes {len(restantes)}, clôturées {len(fermees)}, "
           f"requêtes dex {stats['dex']} gt {stats['gt']} (échecs {stats['gt_echecs']})")
 
