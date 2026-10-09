@@ -86,13 +86,22 @@ def historique_llama(univ, nouveaux, maintenant):
     """Historique horaire des 48 dernières heures pour les tokens qu'on vient de découvrir (DefiLlama, gratuit).
     Permet de voir tout de suite le pump et le sommet, au lieu de 3 points reconstitués."""
     # DefiLlama ne connaît qu'une partie des memecoins (~15 %) : on vérifie d'abord lesquels
+    # un token n'est marqué « essayé » que si la requête a abouti : sinon on réessaie au relevé suivant
     connus = []
     for k in range(0, len(nouveaux), 50):
-        d = llama(f"{LLAMA_COINS}/prices/current/" + ",".join("solana:" + t for t in nouveaux[k:k + 50]))
-        connus += [c.split(":", 1)[1] for c in ((d or {}).get("coins") or {})]
+        lot = nouveaux[k:k + 50]
+        d = llama(f"{LLAMA_COINS}/prices/current/" + ",".join("solana:" + t for t in lot))
+        if d is None:
+            continue
+        connus += [c.split(":", 1)[1] for c in (d.get("coins") or {})]
+        for t in lot:
+            univ[t]["histo_essai"] = True
     for k in range(0, len(connus), 10):   # au-delà de 10 tokens par requête, l'API refuse
         lot = connus[k:k + 10]
         d = llama(f"{LLAMA_COINS}/chart/" + ",".join("solana:" + t for t in lot) + "?span=48&period=1h&searchWidth=600")
+        if d is None:
+            for t in lot:
+                univ[t]["histo_essai"] = False
         for cle, v in ((d or {}).get("coins") or {}).items():
             t = cle.split(":", 1)[1]
             u = univ.get(t)
@@ -364,6 +373,11 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel):
 def main():
     maintenant = int(time.time())
     univ = charger("univers.json", {})
+    if not os.path.exists(os.path.join(DATA, ".llama_v2")):
+        for u in univ.values():
+            if u.get("histo") != "llama":
+                u["histo_essai"] = False
+        open(os.path.join(DATA, ".llama_v2"), "w").write("1")
     positions = charger("positions.json", [])
     fermees = charger("fermees.json", [])
     deja = {(p["token"], p["strat"], p["peak_t"]) for p in positions + fermees}
@@ -372,8 +386,6 @@ def main():
     decouvrir(univ, maintenant)
     n_rel = relever(univ, maintenant)
     a_completer = [t for t, u in univ.items() if not u.get("histo_essai") and u.get("ratio")]
-    for t in a_completer:
-        univ[t]["histo_essai"] = True
     historique_llama(univ, a_completer, maintenant)
     ctx = contexte_marche(maintenant)
 

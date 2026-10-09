@@ -10,7 +10,7 @@ while [ "$(date +%s)" -lt "$fin" ]; do
   debut=$(date +%s)
   git pull -q --rebase || true
   python scanner.py || echo "erreur pendant le relevé"
-  git add data RAPPORT.md
+  git add -A data RAPPORT.md
   # le site Vercel se met à jour un relevé sur deux (toutes les 30 min, limite de 100 déploiements par jour)
   n=$((n + 1)); tag=""
   if [ $((n % 2)) -eq 1 ]; then tag=" [deploy]"; fi
