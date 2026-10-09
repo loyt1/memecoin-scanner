@@ -2,6 +2,9 @@
 # Fait tourner le scanner en continu pendant ~5 h 40 : un relevé toutes les 15 minutes.
 # GitHub relance ce script automatiquement (voir .github/workflows/scan.yml).
 set -u
+# Dès le début, la session réserve la suivante : elle attend dans la file et démarre dès que celle-ci se termine.
+# (GitHub ne garantit pas les relances programmées.)
+gh workflow run scan.yml --ref main || echo "réservation impossible, la relance horaire prendra le relais"
 git config user.name "scanner-bot"
 git config user.email "scanner-bot@users.noreply.github.com"
 fin=$(( $(date +%s) + 5 * 3600 + 40 * 60 ))
@@ -19,5 +22,3 @@ while [ "$(date +%s)" -lt "$fin" ]; do
   reste=$(( 900 - ($(date +%s) - debut) ))
   if [ "$reste" -gt 0 ]; then sleep "$reste"; fi
 done
-# Avant de s'arrêter, la session lance elle-même la suivante (GitHub ne garantit pas les relances programmées).
-gh workflow run scan.yml --ref main || echo "relance impossible, la relance horaire prendra le relais"
