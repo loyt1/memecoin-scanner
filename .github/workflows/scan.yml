@@ -5,6 +5,7 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: scan
   cancel-in-progress: false
@@ -19,3 +20,5 @@ jobs:
           python-version: "3.11"
       - name: Relevés en continu (toutes les 15 min pendant 5 h 40)
         run: bash boucle.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
