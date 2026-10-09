@@ -39,7 +39,13 @@ SORTIES = {
     "50_x2_sl60": {"sl": 0.60, "tps": [(0.5, 0.5), (1.0, 0.5)]},
     "30_60_sl60": {"sl": 0.60, "tps": [(0.3, 0.5), (0.6, 0.5)]},
     "50_x2_sl30": {"sl": 0.30, "tps": [(0.5, 0.5), (1.0, 0.5)]},
+    # « moonbag » : 40 % à +50 %, 40 % à x2, on garde 20 % avec un stop suiveur à -40 % du plus haut, jusqu'à 7 jours
+    "moonbag": {"sl": 0.60, "tps": [(0.5, 0.4), (1.0, 0.4)], "suiveur": 0.40, "max_h": 168},
 }
+# Stratégie C : convergence KOL (au moins KOL_MIN KOLs différents achètent le même token en moins d'une heure)
+KOL_MIN = 3
+KOL_ACHAT_MIN_USD = 50
+KOLS_DIR = os.path.join(DATA, "kols")
 SOMMET_MIN, SOMMET_MAX = 1e6, 15e6
 DUREE_MAX_H = 72
 FRAIS = 0.03
@@ -178,6 +184,9 @@ def decouvrir(univ, maintenant):
                 fdv = float(a.get("fdv_usd") or 0)
                 if 500_000 <= fdv <= 20_000_000:
                     nouveaux.add(p["relationships"]["base_token"]["data"]["id"].split("_", 1)[1])
+    for x in trades_kol(maintenant - 2 * 3600):
+        if x["d"] == "B" and x["usd"] >= KOL_ACHAT_MIN_USD:
+            nouveaux.add(x["tok"])
     for t in nouveaux:
         univ.setdefault(t, {"vu": maintenant, "pts": []})
     return len(nouveaux)
@@ -220,7 +229,7 @@ def relever(univ, maintenant):
         if mc > 100_000:
             u["vu"] = maintenant
     # ménage : tokens morts ou plus suivis depuis longtemps
-    for t in [t for t, u in univ.items() if maintenant - u["vu"] > GARDE_H * 3600]:
+    for t in [t for t, u in univ.items() if maintenant - u["vu"] > GARDE_H * 3600 and not u.get("en_position")]:
         del univ[t]
     return len(infos)
 
@@ -288,18 +297,59 @@ def signaux(u, token, peak_t, kol_map):
     return s
 
 
+# ---------- 3 bis. Flux KOL (écrit par ecoute_kols.py) ----------
+def trades_kol(depuis):
+    out = []
+    if not os.path.isdir(KOLS_DIR):
+        return out
+    for f in sorted(os.listdir(KOLS_DIR)):
+        try:
+            debut = datetime.strptime(f[:13], "%Y-%m-%d-%H").replace(tzinfo=timezone.utc).timestamp()
+        except ValueError:
+            continue
+        if debut + 3600 < depuis:
+            continue
+        for ligne in open(os.path.join(KOLS_DIR, f)):
+            try:
+                x = json.loads(ligne)
+            except ValueError:
+                continue
+            if x["t"] >= depuis:
+                out.append(x)
+    return out
+
+
+def kol_resume(trades, token, depuis, kol_map):
+    """Achats et ventes des KOLs sur un token depuis un instant donné."""
+    a = [x for x in trades if x["tok"] == token and x["t"] >= depuis]
+    ach = {x["w"] for x in a if x["d"] == "B"}
+    ven = {x["w"] for x in a if x["d"] == "S"}
+    return {"kols_acheteurs": len(ach), "kols_vendeurs": len(ven),
+            "kols_achat_usd": round(sum(x["usd"] for x in a if x["d"] == "B")),
+            "kols_vente_usd": round(sum(x["usd"] for x in a if x["d"] == "S")),
+            "kols_noms": " ".join(sorted({kol_map.get(w, w[:6]) for w in ach}))[:200]}
+
+
 # ---------- 4. Suivi des positions ----------
 def evaluer(pos, u, maintenant):
     ent = pos["prix_entree"]
-    pts = [x for x in u["pts"] if x[2] == 0 and pos["entree_t"] < x[0] <= pos["entree_t"] + DUREE_MAX_H * 3600]
-    fini = maintenant >= pos["entree_t"] + DUREE_MAX_H * 3600
+    tous = [x for x in u["pts"] if x[2] == 0 and pos["entree_t"] < x[0]]
+    pts = [x for x in tous if x[0] <= pos["entree_t"] + DUREE_MAX_H * 3600]
     for nom, v in SORTIES.items():
-        r = pos["res"][nom]
+        r = pos["res"].setdefault(nom, {"ferme": False, "pnl": -FRAIS})
         if r["ferme"]:
             continue
+        duree = v.get("max_h", DUREE_MAX_H)
+        pts = [x for x in tous if x[0] <= pos["entree_t"] + duree * 3600]
+        fini = maintenant >= pos["entree_t"] + duree * 3600
         # evts : chaque vente partielle ou totale, avec l'heure, la part vendue et le gain
-        reste, pnl, k, evts = 1.0, 0.0, 0, []
+        reste, pnl, k, evts, haut = 1.0, 0.0, 0, [], ent
         for x in pts:
+            haut = max(haut, x[1])
+            if v.get("suiveur") and k == len(v["tps"]) and reste > 1e-9 and x[1] <= haut * (1 - v["suiveur"]):
+                g = x[1] / ent - 1
+                evts.append({"t": x[0], "type": "stop suiveur", "part": round(reste, 4), "gain": round(g, 4)})
+                pnl += reste * g; reste = 0; break
             if x[1] <= ent * (1 - v["sl"]):
                 evts.append({"t": x[0], "type": "stop", "part": round(reste, 4), "gain": -v["sl"]})
                 pnl += reste * -v["sl"]; reste = 0; break
@@ -311,18 +361,19 @@ def evaluer(pos, u, maintenant):
                 break
         dernier = pts[-1][1] / ent - 1 if pts else 0
         if reste > 1e-9 and fini:
-            evts.append({"t": pts[-1][0] if pts else maintenant, "type": "sortie 72 h", "part": round(reste, 4),
+            evts.append({"t": pts[-1][0] if pts else maintenant, "type": f"sortie {duree} h", "part": round(reste, 4),
                          "gain": round(dernier, 4)})
         r["evts"], r["reste"], r["gain_latent"] = evts, round(reste, 4), round(dernier, 4)
         if reste <= 1e-9 or fini:
             r.update({"ferme": True, "pnl": round(pnl + reste * dernier - FRAIS, 4), "t_fin": evts[-1]["t"] if evts else maintenant})
         else:
             r["pnl"] = round(pnl + reste * dernier - FRAIS, 4)
+    pts = [x for x in tous if x[0] <= pos["entree_t"] + DUREE_MAX_H * 3600]
     if pts:
-        pos["mc_actuel"] = pts[-1][1]
+        pos["mc_actuel"] = tous[-1][1]
         pos["haut"] = round(max(x[1] for x in pts) / ent - 1, 3)
         pos["bas"] = round(min(x[1] for x in pts) / ent - 1, 3)
-        pos["nouveau_sommet"] = any(x[1] > pos["peak"] for x in pts)
+        pos["nouveau_sommet"] = bool(pos.get("peak")) and any(x[1] > pos["peak"] for x in pts)
 
 
 # ---------- 5. Rapport ----------
@@ -333,7 +384,7 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
          f"{stats['gt']} GeckoTerminal ({stats['gt_echecs']} échecs).", "",
          "## Résultats par stratégie et par sortie", "",
          "| Stratégie | Sortie | Trades clôturés | Gagnants | Gain moyen | En cours |", "|---|---|---|---|---|---|"]
-    for st in STRATEGIES:
+    for st in list(STRATEGIES) + ["C"]:
         for so in SORTIES:
             f = [p["res"][so]["pnl"] for p in fermees if p["strat"] == st]
             o = sum(1 for p in positions if p["strat"] == st)
@@ -351,7 +402,7 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
         s = p["sig"]
         statut = "clôturée" if all(v["ferme"] for v in p["res"].values()) else "ouverte"
         L.append(f"| [{p['sym']}](https://dexscreener.com/solana/{p['pair']}) | {p['strat']} | {iso(p['entree_t'])} | "
-                 f"{round(p['prix_entree'] / 1e6, 2)} M$ | x{round(p['pump_x'], 1)} | {round(100 * r['pnl'])} % | "
+                 f"{round(p['prix_entree'] / 1e6, 2)} M$ | {('x' + str(round(p['pump_x'], 1))) if p.get('pump_x') else '-'} | {round(100 * r['pnl'])} % | "
                  f"+{round(100 * p.get('haut', 0))} % | {round(100 * p.get('bas', 0))} % | "
                  f"{s['baleines_achat_usd']}/{s['baleines_vente_usd']} $ | {s['kol_achats']}/{s['kol_ventes']} | "
                  f"{p.get('holders_40')} → {s['holders']} | {statut} |")
@@ -380,10 +431,12 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     """Fichier léger lu par le site (tableau de bord Vercel)."""
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
               "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
-              "nouveau_sommet", "mc_actuel")
+              "nouveau_sommet", "mc_actuel", "retard_min")
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
-               "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"]} for k, v in SORTIES.items()},
+               "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"], "suiveur": v.get("suiveur"), "max_h": v.get("max_h", DUREE_MAX_H)}
+                           for k, v in SORTIES.items()},
+               "flux_kol": len(trades_kol(maintenant - 3600)),
                "duree_max_h": DUREE_MAX_H, "trades": trades, "radar": rad or []},
               open(os.path.join(DATA, "tableau.json"), "w"), separators=(",", ":"))
 
@@ -400,12 +453,16 @@ def main():
     fermees = charger("fermees.json", [])
     deja = {(p["token"], p["strat"], p["peak_t"]) for p in positions + fermees}
     kol_map = kols()
+    for p in positions:
+        if p["token"] in univ:
+            univ[p["token"]]["en_position"] = True
 
     decouvrir(univ, maintenant)
     n_rel = relever(univ, maintenant)
     a_completer = [t for t, u in univ.items() if not u.get("histo_essai") and u.get("ratio")]
     historique_llama(univ, a_completer, maintenant)
     ctx = contexte_marche(maintenant)
+    flux = trades_kol(maintenant - 48 * 3600)
 
     for t, u in univ.items():
         if u.get("maj") != maintenant:
@@ -435,6 +492,8 @@ def main():
             else:
                 continue
             sig = signaux(u, t, e["peak_t"], kol_map)
+            sig.update(kol_resume(flux, t, e["peak_t"], kol_map) if flux else
+                       {"kols_acheteurs": None, "kols_vendeurs": None, "kols_achat_usd": None, "kols_vente_usd": None, "kols_noms": ""})
             pos = {"token": t, "pair": u["pair"], "sym": u["sym"], "strat": strat, "entree_t": maintenant,
                    "prix_entree": prix, "ordre_limite": prix == limite, "mc_reel": e["mc"], "peak": e["peak"], "peak_t": e["peak_t"],
                    "pump_x": round(e["pump_x"], 2), "pump_h": round((e["peak_t"] - e["pre_t"]) / 3600, 1),
@@ -454,18 +513,52 @@ def main():
                                         "historique": u.get("histo", "reconstitue"), **sig,
                                         **{"marche_" + k: v for k, v in pos["contexte"].items()}})
 
+    # Stratégie C : au moins KOL_MIN KOLs différents achètent le même token dans la dernière heure
+    recents = [x for x in flux if x["t"] >= maintenant - 3600 and x["d"] == "B" and x["usd"] >= KOL_ACHAT_MIN_USD]
+    par_token = {}
+    for x in recents:
+        par_token.setdefault(x["tok"], set()).add(x["w"])
+    deja_c = {p["token"] for p in positions + fermees if p["strat"] == "C" and maintenant - p["entree_t"] < 24 * 3600}
+    for t, wallets in par_token.items():
+        if len(wallets) < KOL_MIN or t in deja_c:
+            continue
+        u = univ.get(t)
+        if not u or u.get("maj") != maintenant or not u.get("pair"):
+            continue   # pas encore de prix pour ce token : il sera pris au relevé suivant s'il est toujours en convergence
+        mc = u["pts"][-1][1]
+        trois = sorted(x["t"] for x in recents if x["tok"] == t)
+        sig = {"baleines_achat_usd": None, "baleines_vente_usd": None, "baleines_acheteurs": None, "baleines_vendeurs": None,
+               "kol_achats": len(wallets), "kol_ventes": None, "kol_noms": "", "holders": None,
+               **kol_resume(flux, t, maintenant - 3600, kol_map)}
+        pos = {"token": t, "pair": u["pair"], "sym": u.get("sym") or "?", "strat": "C", "entree_t": maintenant,
+               "prix_entree": mc, "ordre_limite": False, "mc_reel": mc, "peak": None, "peak_t": None,
+               "pump_x": None, "pump_h": None, "h_vers_entree": None, "liq": u.get("liq"), "x": u.get("x"),
+               "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
+               "retard_min": round((maintenant - trois[KOL_MIN - 1]) / 60) if len(trois) >= KOL_MIN else None,
+               "holders_40": None, "sig": sig, "contexte": {k: v for k, v in ctx.items() if k != "t"},
+               "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
+        positions.append(pos)
+        u["en_position"] = True
+        ajouter_csv("entrees_c.csv", {"date": iso(maintenant), "token": t, "sym": pos["sym"], "mc_entree": round(mc),
+                                      "liquidite": u.get("liq"), "age_h": pos["age_h"], "retard_min": pos["retard_min"],
+                                      **{k: sig[k] for k in ("kols_acheteurs", "kols_vendeurs", "kols_achat_usd", "kols_vente_usd", "kols_noms")},
+                                      **{"marche_" + k: v for k, v in pos["contexte"].items()}})
+
     restantes = []
     for p in positions:
         u = univ.get(p["token"])
         if u:
             evaluer(p, u, maintenant)
-        if all(v["ferme"] for v in p["res"].values()) or maintenant > p["entree_t"] + (DUREE_MAX_H + 6) * 3600:
+        duree_max = max(v.get("max_h", DUREE_MAX_H) for v in SORTIES.values())
+        if all(v["ferme"] for v in p["res"].values()) or maintenant > p["entree_t"] + (duree_max + 6) * 3600:
             for v in p["res"].values():
                 v["ferme"] = True
                 v.setdefault("t_fin", maintenant)
             fermees.append(p)
+            if p["token"] in univ:
+                univ[p["token"]]["en_position"] = False
             ajouter_csv("sorties.csv", {"date_entree": iso(p["entree_t"]), "sym": p["sym"], "token": p["token"],
-                                        "strat": p["strat"], **{k: v["pnl"] for k, v in p["res"].items()},
+                                        "strat": p["strat"], **{k: p["res"].get(k, {}).get("pnl") for k in SORTIES},
                                         "haut_max": p.get("haut"), "bas_max": p.get("bas"),
                                         "nouveau_sommet": p.get("nouveau_sommet")})
         else:

@@ -7,6 +7,10 @@ set -u
 gh workflow run scan.yml --ref main || echo "réservation impossible, la relance horaire prendra le relais"
 git config user.name "scanner-bot"
 git config user.email "scanner-bot@users.noreply.github.com"
+# Écoute en continu le flux des trades de KOLs (stratégie C et signaux KOL), pendant toute la session
+python ecoute_kols.py > /tmp/ecoute_kols.log 2>&1 &
+ECOUTE=$!
+trap 'kill $ECOUTE 2>/dev/null; pkill -f kolscan-api 2>/dev/null' EXIT
 fin=$(( $(date +%s) + 5 * 3600 + 40 * 60 ))
 n=0
 while [ "$(date +%s)" -lt "$fin" ]; do

@@ -38,7 +38,7 @@ td.n{font-family:"JetBrains Mono",monospace;white-space:nowrap}
 .scroll{overflow-x:auto}
 a{color:var(--acc);text-decoration:none}
 .tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
-.tag.B{color:#60a5fa}.tag.G{color:#c084fc}
+.tag.B{color:#60a5fa}.tag.G{color:#c084fc}.tag.C{color:#34d399}
 .journal{max-height:520px;overflow-y:auto}
 .ev{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
 .ev .t{color:var(--mut);font:12px "JetBrains Mono",monospace;min-width:92px}
@@ -74,7 +74,7 @@ a{color:var(--acc);text-decoration:none}
 
   <div class="panel controls">
     <label>Stratégie
-      <select id="f-strat"><option value="BG">B + G</option><option value="B">B (-60 %)</option><option value="G" selected>G (-70 %)</option></select>
+      <select id="f-strat"><option value="BGC">B + G + C</option><option value="BG">B + G</option><option value="B">B (-60 %)</option><option value="G" selected>G (-70 %)</option><option value="C">C (convergence KOL)</option></select>
     </label>
     <label>Sortie
       <select id="f-sortie"></select>
@@ -112,7 +112,7 @@ a{color:var(--acc);text-decoration:none}
   <div class="panel">
     <h2>Comparaison de toutes les variantes (même capital, même mise)</h2>
     <div class="scroll"><table id="t-comp"></table></div>
-    <div class="note">Référence backtest du 8 octobre (sortie 50/x2, stop -60 %) : B +17 % par trade, G +31 % par trade.</div>
+    <div class="note">Référence backtest du 8 octobre (sortie 50/x2, stop -60 %) : B +17 % par trade, G +31 % par trade. C (au moins 3 KOLs achètent le même token en moins d'1 h, achat au marché) : pas de backtest, c'est un test en direct.</div>
   </div>
 
   <div class="grid2">
@@ -208,7 +208,7 @@ function rendre() {
 
   // comparaison
   let h = '<tr><th>Stratégie</th><th>Sortie</th><th>Capital final</th><th>Profit</th><th>Trades clôturés</th><th>Gagnants</th><th>Gain moyen</th><th>Ouvertes</th></tr>';
-  for (const st of ['B', 'G']) for (const so of Object.keys(DATA.sorties)) {
+  for (const st of ['B', 'G', 'C']) for (const so of Object.keys(DATA.sorties)) {
     const r = simuler(filtre(st), so, mise, cap, DATA.frais), d = r.eq - cap;
     h += `<tr><td><span class="tag ${st}">${st}</span></td><td>${nomSortie(so)}</td><td class="n">${usd(r.eq)}</td><td class="n ${cls(d)}">${usd(d)} (${pct(d / cap)})</td>
       <td class="n">${r.n}</td><td class="n">${r.n ? Math.round(100 * r.win / r.n) + ' %' : '–'}</td><td class="n ${cls(r.avg || 0)}">${r.avg == null ? '–' : pct(r.avg)}</td><td class="n">${r.ouvertes}</td></tr>`;
@@ -219,6 +219,11 @@ function rendre() {
   const J = [...s.journal].sort((a, b) => b.t - a.t);
   $('journal').innerHTML = J.length ? J.map(j => {
     const p = j.p, sig = p.sig || {};
+    if (j.type === 'achat' && p.strat === 'C') {
+      const why = [`${sig.kols_acheteurs ?? sig.kol_achats} KOLs ont acheté en moins d'1 h${sig.kols_noms ? ' (' + esc(sig.kols_noms) + ')' : ''}`, `${usd(sig.kols_achat_usd || 0)} achetés par les KOLs`,
+        `achat au marché à ${mc(p.prix_entree)}`, p.retard_min != null ? `${p.retard_min} min après le 3e achat` : ''].filter(Boolean).join(' · ');
+      return ev(j.t, '#34d399', `<b>Achat</b> <a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a> <span class="tag C">C</span> · ${usd(j.size)}`, why);
+    }
     if (j.type === 'achat') {
       const why = [`sommet ${mc(p.peak)} → ${p.ordre_limite ? 'ordre limite' : 'achat au marché'} à ${mc(p.prix_entree)}`, `pump x${p.pump_x} en ${p.pump_h} h`, `chute en ${p.h_vers_entree} h`,
         `baleines ${sig.baleines_achat_usd ?? '?'} $ achetés / ${sig.baleines_vente_usd ?? '?'} $ vendus`, `KOLs ${sig.kol_achats ?? '?'} achats / ${sig.kol_ventes ?? '?'} ventes${sig.kol_noms ? ' (' + sig.kol_noms + ')' : ''}`,
@@ -227,7 +232,7 @@ function rendre() {
     }
     if (j.type === 'skip') return ev(j.t, '#8a91a5', `Signal ignoré : ${esc(p.sym)} (capital insuffisant)`, '');
     const g = j.e.gain, c = j.type === 'stop' ? '#ef4444' : g >= 0 ? '#22c55e' : '#f59e0b';
-    const quoi = j.type === 'stop' ? 'Stop touché' : j.type === 'sortie 72 h' ? 'Sortie après 72 h' : `Vente ${j.type}`;
+    const quoi = j.type === 'stop' ? 'Stop touché' : j.type === 'stop suiveur' ? 'Stop suiveur touché' : j.type.startsWith('sortie') ? 'Sortie (durée maximale atteinte)' : `Vente ${j.type}`;
     return ev(j.t, c, `<b>${quoi}</b> ${esc(p.sym)} <span class="tag ${p.strat}">${p.strat}</span> · ${Math.round(j.e.part * 100)} % de la position à <span class="${cls(g)}">${pct(g)}</span>`, `récupéré ${usd(j.rendu)} sur ${usd(j.size * j.e.part)} investis`);
   }).join('') : '<div class="empty">Aucune décision pour l\'instant. Le bot attend un retracement qui coche toutes les cases.</div>';
 
@@ -243,8 +248,8 @@ function rendre() {
   $('t-all').innerHTML = tous.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>Sommet</th><th>MC entrée</th><th>Pump</th><th>Résultat</th><th>Plus haut</th><th>Plus bas</th><th>Baleines A/V</th><th>KOLs A/V</th><th>Holders</th><th>Statut</th></tr>' + tous.map(p => {
     const r = p.res[sortie], sig = p.sig || {};
     return `<tr><td><a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a></td><td><span class="tag ${p.strat}">${p.strat}</span></td><td class="n">${fmtT(p.entree_t)}</td><td class="n">${mc(p.peak)}</td><td class="n">${mc(p.prix_entree)}</td>
-      <td class="n">x${p.pump_x}</td><td class="n ${cls(r.pnl)}">${pct(r.pnl)}</td><td class="n up">${p.haut != null ? pct(p.haut) : '–'}</td><td class="n down">${p.bas != null ? pct(p.bas) : '–'}</td>
-      <td class="n">${sig.baleines_achat_usd ?? '?'} / ${sig.baleines_vente_usd ?? '?'}</td><td class="n">${sig.kol_achats ?? '?'} / ${sig.kol_ventes ?? '?'}</td><td class="n">${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}</td><td>${r.ferme ? 'clôturé' : '<span class="up">ouvert</span>'}</td></tr>`;
+      <td class="n">${p.pump_x ? 'x' + p.pump_x : '–'}</td><td class="n ${cls(r.pnl)}">${pct(r.pnl)}</td><td class="n up">${p.haut != null ? pct(p.haut) : '–'}</td><td class="n down">${p.bas != null ? pct(p.bas) : '–'}</td>
+      <td class="n">${sig.baleines_achat_usd ?? '?'} / ${sig.baleines_vente_usd ?? '?'}</td><td class="n">${sig.kols_acheteurs ?? sig.kol_achats ?? '?'} / ${sig.kols_vendeurs ?? sig.kol_ventes ?? '?'}</td><td class="n">${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}</td><td>${r.ferme ? 'clôturé' : '<span class="up">ouvert</span>'}</td></tr>`;
   }).join('') : '<tr><td class="empty">Aucun trade pour l\'instant.</td></tr>';
 }
 
@@ -265,7 +270,7 @@ function rendreRadar() {
 
 function ev(t, couleur, txt, why) { return `<div class="ev"><div class="t">${fmtT(t)}</div><div class="dot" style="background:${couleur}"></div><div class="d">${txt}${why ? `<div class="why">${why}</div>` : ''}</div></div>`; }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
-function nomSortie(k) { const v = DATA.sorties[k]; return v.tps.map(t => '+' + Math.round(t[0] * 100) + ' %').join(' / ') + ', stop -' + Math.round(v.sl * 100) + ' %'; }
+function nomSortie(k) { const v = DATA.sorties[k]; let n = v.tps.map(t => '+' + Math.round(t[0] * 100) + ' %').join(' / ') + ', stop -' + Math.round(v.sl * 100) + ' %'; if (v.suiveur) n = '40 % à +50 % / 40 % à +100 %, 20 % gardés (stop suiveur -' + Math.round(v.suiveur * 100) + ' %, 7 j)'; return n; }
 
 async function charger() {
   try {
@@ -275,7 +280,7 @@ async function charger() {
     sel.innerHTML = Object.keys(DATA.sorties).map(k => `<option value="${k}">${nomSortie(k)}</option>`).join('');
     if (garde) sel.value = garde;
     const age = Math.round((Date.now() / 1000 - DATA.maj) / 60);
-    $('maj').innerHTML = `Dernier relevé : ${fmtT(DATA.maj)} (il y a ${age} min) · ${DATA.tokens_suivis} tokens suivis`;
+    $('maj').innerHTML = `Dernier relevé : ${fmtT(DATA.maj)} (il y a ${age} min) · ${DATA.tokens_suivis} tokens suivis` + (DATA.flux_kol != null ? ` · ${DATA.flux_kol} trades de KOLs captés en 1 h` : '');
     rendreRadar();
     rendre();
   } catch (e) { $('maj').textContent = 'Données indisponibles pour le moment.'; }
