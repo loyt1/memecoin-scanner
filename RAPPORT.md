@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-09 19:02 UTC)
+# Rapport du scanner (mis à jour le 2026-10-09 19:08 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 556 (dont 543 relevés à ce passage). Requêtes : 23 Dexscreener, 15 GeckoTerminal (0 échecs).
+Tokens suivis : 565 (dont 551 relevés à ce passage). Requêtes : 23 Dexscreener, 15 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -11,9 +11,15 @@ Tokens suivis : 556 (dont 543 relevés à ce passage). Requêtes : 23 Dexscreene
 | B | 50_x2_sl60 | 0 | - | - | 0 |
 | B | 30_60_sl60 | 0 | - | - | 0 |
 | B | 50_x2_sl30 | 0 | - | - | 0 |
+| B | moonbag | 0 | - | - | 0 |
 | G | 50_x2_sl60 | 0 | - | - | 0 |
 | G | 30_60_sl60 | 0 | - | - | 0 |
 | G | 50_x2_sl30 | 0 | - | - | 0 |
+| G | moonbag | 0 | - | - | 0 |
+| C | 50_x2_sl60 | 0 | - | - | 0 |
+| C | 30_60_sl60 | 0 | - | - | 0 |
+| C | 50_x2_sl30 | 0 | - | - | 0 |
+| C | moonbag | 0 | - | - | 0 |
 
 Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trade.
 
