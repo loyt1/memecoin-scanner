@@ -1,5 +1,4 @@
 {
-  "ignoreCommand": "git log -1 --pretty=%B | grep -q '\\[deploy\\]' && exit 1; git diff --quiet HEAD^ HEAD -- . ':(exclude)data' ':(exclude)RAPPORT.md' && exit 0 || exit 1",
   "headers": [
     { "source": "/data/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
   ]
