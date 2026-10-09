@@ -49,6 +49,17 @@ a{color:var(--acc);text-decoration:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
 .note{color:var(--mut);font-size:12px;margin-top:8px}
+.top3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+@media (max-width:760px){.top3{grid-template-columns:1fr}}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card .rk{color:var(--mut);font-size:12px}
+.card .sym{font-size:18px;font-weight:700;margin:2px 0 6px}
+.card .big{font:600 20px "JetBrains Mono",monospace}
+.bar{position:relative;height:8px;background:#0e1118;border-radius:99px;margin:10px 0 4px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:99px}
+.bar b{position:absolute;top:-2px;bottom:-2px;width:2px;background:#e7e9ee}
+.lg{position:relative;height:14px;color:var(--mut);font-size:11px}
+.lg span{position:absolute;top:0;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -83,6 +94,13 @@ a{color:var(--acc);text-decoration:none}
     <div class="kpi"><div class="l">Trades gagnants</div><div class="v" id="k-win">–</div></div>
     <div class="kpi"><div class="l">Gain moyen par trade</div><div class="v" id="k-avg">–</div></div>
     <div class="kpi"><div class="l">Positions ouvertes</div><div class="v" id="k-open">–</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Radar : les tokens surveillés en priorité</h2>
+    <div class="top3" id="top3"></div>
+    <div class="scroll"><table id="t-radar"></table></div>
+    <div class="note">Tokens qui ont pumpé (x2 à x10 en 48 h, sommet entre 1 et 15 M$) et qui retracent. Le bot achète à -60 % sous le sommet (B, pump jusqu'à x5) ou à -70 % (G). Les plus proches de la zone d'achat sont en premier.</div>
   </div>
 
   <div class="panel">
@@ -230,6 +248,21 @@ function rendre() {
   }).join('') : '<tr><td class="empty">Aucun trade pour l\'instant.</td></tr>';
 }
 
+function rendreRadar() {
+  const R = DATA.radar || [];
+  const lien = r => `<a href="https://dexscreener.com/solana/${r.pair}" target="_blank">${esc(r.sym)}</a>`;
+  $('top3').innerHTML = R.length ? R.slice(0, 3).map((r, i) => {
+    const w = Math.min(100, r.baisse / 0.7 * 100);
+    return `<div class="card"><div class="rk">n°${i + 1} · stratégie ${r.strategies}</div><div class="sym">${lien(r)}</div>
+      <div class="big down">-${Math.round(r.baisse * 100)} %</div><div class="rk">sous son sommet de ${mc(r.sommet)} (il y a ${r.h_depuis_sommet} h)</div>
+      <div class="bar"><i style="width:${w}%"></i><b style="left:${60 / 70 * 100}%"></b></div>
+      <div class="lg"><span style="left:0">0 %</span><span style="right:${100 - 60 / 70 * 100}%">B -60 %</span><span style="right:0">G -70 %</span></div>
+      <div class="rk" style="margin-top:8px">MC actuelle ${mc(r.mc)} · pump x${r.pump_x} · liquidité ${r.liq ? usd(r.liq) : '?'}</div></div>`;
+  }).join('') : '<div class="empty" style="grid-column:1/-1">Aucun token ne fait le pattern en ce moment.</div>';
+  $('t-radar').innerHTML = R.length > 3 ? '<tr><th>Token</th><th>Baisse depuis le sommet</th><th>Sommet</th><th>MC actuelle</th><th>Pump</th><th>Depuis le sommet</th><th>Stratégies</th></tr>' + R.slice(3).map(r =>
+    `<tr><td>${lien(r)}</td><td class="n down">-${Math.round(r.baisse * 100)} %</td><td class="n">${mc(r.sommet)}</td><td class="n">${mc(r.mc)}</td><td class="n">x${r.pump_x}</td><td class="n">${r.h_depuis_sommet} h</td><td>${r.strategies}</td></tr>`).join('') : '';
+}
+
 function ev(t, couleur, txt, why) { return `<div class="ev"><div class="t">${fmtT(t)}</div><div class="dot" style="background:${couleur}"></div><div class="d">${txt}${why ? `<div class="why">${why}</div>` : ''}</div></div>`; }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
 function nomSortie(k) { const v = DATA.sorties[k]; return v.tps.map(t => '+' + Math.round(t[0] * 100) + ' %').join(' / ') + ', stop -' + Math.round(v.sl * 100) + ' %'; }
@@ -243,6 +276,7 @@ async function charger() {
     if (garde) sel.value = garde;
     const age = Math.round((Date.now() / 1000 - DATA.maj) / 60);
     $('maj').innerHTML = `Dernier relevé : ${fmtT(DATA.maj)} (il y a ${age} min) · ${DATA.tokens_suivis} tokens suivis`;
+    rendreRadar();
     rendre();
   } catch (e) { $('maj').textContent = 'Données indisponibles pour le moment.'; }
 }

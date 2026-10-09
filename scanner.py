@@ -358,7 +358,25 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
     open(os.path.join(ICI, "RAPPORT.md"), "w").write("\n".join(L) + "\n")
 
 
-def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel):
+def radar(univ, maintenant):
+    """Tokens qui font le pattern (pump récent, sommet 1-15 M$) mais pas encore à -60 % : les plus proches d'abord."""
+    r = []
+    for t, u in univ.items():
+        if u.get("maj") != maintenant:
+            continue
+        e = etat_retracement(u, maintenant)
+        if not e or not (SOMMET_MIN <= e["peak"] <= SOMMET_MAX) or not (2 <= e["pump_x"] <= 10):
+            continue
+        h = (maintenant - e["peak_t"]) / 3600
+        if h > 48 or e["dd"] >= 0.6:
+            continue
+        r.append({"sym": u["sym"], "pair": u["pair"], "token": t, "sommet": e["peak"], "mc": e["mc"], "pump_x": round(e["pump_x"], 1),
+                  "baisse": round(e["dd"], 3), "h_depuis_sommet": round(h, 1), "liq": u.get("liq"),
+                  "strategies": "B+G" if e["pump_x"] <= 5 else "G"})
+    return sorted(r, key=lambda x: -x["baisse"])[:15]
+
+
+def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     """Fichier léger lu par le site (tableau de bord Vercel)."""
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
               "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
@@ -366,7 +384,7 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel):
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
                "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"]} for k, v in SORTIES.items()},
-               "duree_max_h": DUREE_MAX_H, "trades": trades},
+               "duree_max_h": DUREE_MAX_H, "trades": trades, "radar": rad or []},
               open(os.path.join(DATA, "tableau.json"), "w"), separators=(",", ":"))
 
 
@@ -402,13 +420,20 @@ def main():
             if e["pump_x"] > s["pump_max"] or e["dd"] < s["dd"] or (t, strat, e["peak_t"]) in deja:
                 continue
             h = (maintenant - e["peak_t"]) / 3600
-            if h < s["h_min"] or h > 48 or e["dd"] > s["dd"] + 0.10:
+            if h < s["h_min"] or h > 48:
                 continue
-            # Si on avait déjà vu le token au-dessus du seuil, l'ordre limite aurait été posé :
-            # entrée au prix limite. Sinon (découvert déjà sous le seuil) : achat au prix actuel.
+            # Si on avait déjà vu le token au-dessus du seuil, l'ordre limite aurait été posé et exécuté,
+            # même si le prix a ensuite plongé bien plus bas (on compte alors la perte, pour rester honnête).
+            # Sinon (token découvert déjà sous le seuil) : achat au prix actuel, et seulement s'il n'est
+            # pas plus de 10 points sous le seuil (sinon c'est un rug déjà fini).
             vus = [x for x in u["pts"][:-1] if x[2] == 0 and x[0] >= e["peak_t"]]
             limite = e["peak"] * (1 - s["dd"])
-            prix = limite if vus and vus[-1][1] > limite else min(limite, e["mc"])
+            if vus and vus[-1][1] > limite:
+                prix = limite
+            elif e["dd"] <= s["dd"] + 0.10:
+                prix = min(limite, e["mc"])
+            else:
+                continue
             sig = signaux(u, t, e["peak_t"], kol_map)
             pos = {"token": t, "pair": u["pair"], "sym": u["sym"], "strat": strat, "entree_t": maintenant,
                    "prix_entree": prix, "ordre_limite": prix == limite, "mc_reel": e["mc"], "peak": e["peak"], "peak_t": e["peak_t"],
@@ -450,7 +475,7 @@ def main():
     sauver("positions.json", restantes)
     sauver("fermees.json", fermees)
     rapport(restantes, fermees, maintenant, len(univ), n_rel)
-    tableau_de_bord(restantes, fermees, maintenant, len(univ), n_rel)
+    tableau_de_bord(restantes, fermees, maintenant, len(univ), n_rel, radar(univ, maintenant))
     print(f"univers {len(univ)}, relevés {n_rel}, ouvertes {len(restantes)}, clôturées {len(fermees)}, "
           f"requêtes dex {stats['dex']} gt {stats['gt']} (échecs {stats['gt_echecs']}) llama {stats['llama']}, "
           f"{sum(1 for u in univ.values() if u.get('histo') == 'llama')} tokens avec historique DefiLlama")

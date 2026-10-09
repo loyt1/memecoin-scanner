@@ -19,3 +19,5 @@ while [ "$(date +%s)" -lt "$fin" ]; do
   reste=$(( 900 - ($(date +%s) - debut) ))
   if [ "$reste" -gt 0 ]; then sleep "$reste"; fi
 done
+# Avant de s'arrêter, la session lance elle-même la suivante (GitHub ne garantit pas les relances programmées).
+gh workflow run scan.yml --ref main || echo "relance impossible, la relance horaire prendra le relais"
