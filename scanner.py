@@ -23,6 +23,8 @@ from datetime import datetime, timezone
 
 DEX = "https://api.dexscreener.com"
 GT = "https://api.geckoterminal.com/api/v2"
+LLAMA = "https://api.llama.fi"
+LLAMA_COINS = "https://coins.llama.fi"
 ICI = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ICI, "data")
 os.makedirs(DATA, exist_ok=True)
@@ -44,7 +46,7 @@ FRAIS = 0.03
 GARDE_H = 96                 # durée de vie d'un token dans l'univers sans activité
 STABLES = {"USDC", "USDT", "SOL", "WSOL", "USDG", "PYUSD", "USD1", "JUP", "JITOSOL", "MSOL"}
 
-stats = {"dex": 0, "gt": 0, "gt_echecs": 0}
+stats = {"dex": 0, "gt": 0, "gt_echecs": 0, "llama": 0}
 
 
 def _get(url, pause, essais):
@@ -73,6 +75,53 @@ def gt(path):
     if r is None:
         stats["gt_echecs"] += 1
     return r
+
+
+def llama(url):
+    stats["llama"] += 1
+    return _get(url, 0.3, 3)
+
+
+def historique_llama(univ, nouveaux, maintenant):
+    """Historique horaire des 48 dernières heures pour les tokens qu'on vient de découvrir (DefiLlama, gratuit).
+    Permet de voir tout de suite le pump et le sommet, au lieu de 3 points reconstitués."""
+    # DefiLlama ne connaît qu'une partie des memecoins (~15 %) : on vérifie d'abord lesquels
+    connus = []
+    for k in range(0, len(nouveaux), 50):
+        d = llama(f"{LLAMA_COINS}/prices/current/" + ",".join("solana:" + t for t in nouveaux[k:k + 50]))
+        connus += [c.split(":", 1)[1] for c in ((d or {}).get("coins") or {})]
+    for k in range(0, len(connus), 10):   # au-delà de 10 tokens par requête, l'API refuse
+        lot = connus[k:k + 10]
+        d = llama(f"{LLAMA_COINS}/chart/" + ",".join("solana:" + t for t in lot) + "?span=48&period=1h&searchWidth=600")
+        for cle, v in ((d or {}).get("coins") or {}).items():
+            t = cle.split(":", 1)[1]
+            u = univ.get(t)
+            if not u or not u.get("ratio"):
+                continue
+            pts = [[int(x["timestamp"]), round(x["price"] * u["ratio"]), 2] for x in v.get("prices", [])
+                   if x.get("price") and int(x["timestamp"]) < maintenant - 600]
+            if len(pts) >= 6:
+                # remplace les 3 points reconstitués par le vrai historique horaire
+                u["pts"] = sorted(pts + [x for x in u["pts"] if x[2] == 0])
+                u["histo"] = "llama"
+
+
+def contexte_marche(maintenant):
+    """Une fois par heure : volume des DEX sur Solana et sur PumpSwap (DefiLlama). Sert à savoir si
+    la stratégie marche mieux quand le marché des memecoins est chaud ou froid."""
+    p = os.path.join(DATA, "contexte.json")
+    ctx = json.load(open(p)) if os.path.exists(p) else {}
+    if maintenant - ctx.get("t", 0) < 3600:
+        return ctx
+    d = llama(f"{LLAMA}/overview/dexs/solana?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true")
+    if not d:
+        return ctx
+    pump = next((x for x in d.get("protocols", []) if x.get("name") == "PumpSwap"), {})
+    ctx = {"t": maintenant, "sol_vol24": d.get("total24h"), "sol_var7j": d.get("change_7d"),
+           "pumpswap_vol24": pump.get("total24h"), "pumpswap_var7j": pump.get("change_7d")}
+    json.dump(ctx, open(p, "w"))
+    ajouter_csv("contexte.csv", {"date": iso(maintenant), **{k: v for k, v in ctx.items() if k != "t"}})
+    return ctx
 
 
 def charger(nom, defaut):
@@ -141,6 +190,9 @@ def relever(univ, maintenant):
         if mc <= 0 or p["baseToken"]["symbol"].upper() in STABLES:
             continue
         u = univ[t]
+        prix = float(p.get("priceUsd") or 0)
+        if prix > 0:
+            u["ratio"] = mc / prix
         ch = p.get("priceChange") or {}
         if not u["pts"]:
             # premier relevé : on reconstitue quelques points passés grâce aux variations
@@ -319,6 +371,11 @@ def main():
 
     decouvrir(univ, maintenant)
     n_rel = relever(univ, maintenant)
+    a_completer = [t for t, u in univ.items() if not u.get("histo_essai") and u.get("ratio")]
+    for t in a_completer:
+        univ[t]["histo_essai"] = True
+    historique_llama(univ, a_completer, maintenant)
+    ctx = contexte_marche(maintenant)
 
     for t, u in univ.items():
         if u.get("maj") != maintenant:
@@ -347,7 +404,8 @@ def main():
                    "h_vers_entree": round(h, 1), "liq": u.get("liq"), "x": u.get("x"),
                    "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
                    "holders_40": u.get("holders_40") if u.get("h40_peak") == e["peak_t"] else None,
-                   "sig": sig, "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
+                   "sig": sig, "contexte": {k: v for k, v in ctx.items() if k != "t"},
+                   "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
             positions.append(pos)
             deja.add((t, strat, e["peak_t"]))
             ajouter_csv("entrees.csv", {"date": iso(maintenant), "token": t, "sym": u["sym"], "strat": strat,
@@ -355,7 +413,9 @@ def main():
                                         "mc_reel": round(e["mc"]), "pump_x": pos["pump_x"], "pump_h": pos["pump_h"],
                                         "h_vers_entree": pos["h_vers_entree"], "age_h": pos["age_h"],
                                         "liquidite": u.get("liq"), "compte_x": u.get("x"),
-                                        "tx_h1": json.dumps(u.get("tx_h1")), "holders_40": pos["holders_40"], **sig})
+                                        "tx_h1": json.dumps(u.get("tx_h1")), "holders_40": pos["holders_40"],
+                                        "historique": u.get("histo", "reconstitue"), **sig,
+                                        **{"marche_" + k: v for k, v in pos["contexte"].items()}})
 
     restantes = []
     for p in positions:
@@ -380,7 +440,8 @@ def main():
     rapport(restantes, fermees, maintenant, len(univ), n_rel)
     tableau_de_bord(restantes, fermees, maintenant, len(univ), n_rel)
     print(f"univers {len(univ)}, relevés {n_rel}, ouvertes {len(restantes)}, clôturées {len(fermees)}, "
-          f"requêtes dex {stats['dex']} gt {stats['gt']} (échecs {stats['gt_echecs']})")
+          f"requêtes dex {stats['dex']} gt {stats['gt']} (échecs {stats['gt_echecs']}) llama {stats['llama']}, "
+          f"{sum(1 for u in univ.values() if u.get('histo') == 'llama')} tokens avec historique DefiLlama")
 
 
 if __name__ == "__main__":
