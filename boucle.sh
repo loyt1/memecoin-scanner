@@ -2,6 +2,12 @@
 # Fait tourner le scanner en continu pendant ~5 h 40 : un relevé toutes les 15 minutes.
 # GitHub relance ce script automatiquement (voir .github/workflows/scan.yml).
 set -u
+# GitHub fige la version du code au moment de la réservation : on récupère la toute dernière version
+# puis on relance ce script une fois, pour que la session tourne toujours avec le code à jour.
+if [ -z "${BOUCLE_A_JOUR:-}" ]; then
+  git pull -q --rebase origin main || git pull -q origin main || true
+  BOUCLE_A_JOUR=1 exec bash boucle.sh
+fi
 # Dès le début, la session réserve la suivante : elle attend dans la file et démarre dès que celle-ci se termine.
 # (GitHub ne garantit pas les relances programmées.)
 gh workflow run scan.yml --ref main || echo "réservation impossible, la relance horaire prendra le relais"
