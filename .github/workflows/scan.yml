@@ -1,7 +1,7 @@
 name: scan
 on:
   schedule:
-    - cron: "*/15 * * * *"   # toutes les 15 minutes
+    - cron: "7 * * * *"   # relance de secours toutes les heures
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -11,19 +11,11 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python scanner.py
-      - name: Enregistrer les résultats
-        run: |
-          git config user.name "scanner-bot"
-          git config user.email "scanner-bot@users.noreply.github.com"
-          git add data RAPPORT.md
-          # le site Vercel se met à jour toutes les 30 min (limite de 100 déploiements par jour)
-          tag=""; m=$(date -u +%M); if [ $((10#$m % 30)) -lt 15 ]; then tag=" [deploy]"; fi
-          git diff --cached --quiet || git commit -m "scan $(date -u +'%Y-%m-%d %H:%M')$tag"
-          git pull --rebase && git push
+      - name: Relevés en continu (toutes les 15 min pendant 5 h 40)
+        run: bash boucle.sh
