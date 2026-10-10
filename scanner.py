@@ -52,6 +52,9 @@ SOMMET_MIN, SOMMET_MAX = 1e6, 15e6
 DUREE_MAX_H = 72
 FRAIS = 0.03
 GARDE_H = 96                 # durée de vie d'un token dans l'univers sans activité
+# Garde-fou de données : un pool sans liquidité ni volume n'est pas achetable, et son prix affiché peut être figé
+# depuis des heures (cas WHUF le 2026-10-10 : prix bloqué à 5,2 M$ pendant 23 h, liquidité 0, puis 2 530 $).
+LIQ_MIN, VOL24_MIN = 10_000, 10_000
 STABLES = {"USDC", "USDT", "SOL", "WSOL", "USDG", "PYUSD", "USD1", "JUP", "JITOSOL", "MSOL"}
 
 stats = {"dex": 0, "gt": 0, "gt_echecs": 0, "llama": 0}
@@ -368,8 +371,10 @@ def evaluer(pos, u, maintenant):
                 evts.append({"t": x[0], "type": "stop suiveur", "part": round(reste, 4), "gain": round(g, 4)})
                 pnl += reste * g; reste = 0; break
             if x[1] <= ent * (1 - v["sl"]):
-                evts.append({"t": x[0], "type": "stop", "part": round(reste, 4), "gain": -v["sl"]})
-                pnl += reste * -v["sl"]; reste = 0; break
+                # si le prix a sauté par-dessus le stop entre deux relevés (rug), la vente se fait au prix réel, pas au stop
+                g = min(-v["sl"], x[1] / ent - 1)
+                evts.append({"t": x[0], "type": "stop", "part": round(reste, 4), "gain": round(g, 4)})
+                pnl += reste * g; reste = 0; break
             while k < len(v["tps"]) and x[1] >= ent * (1 + v["tps"][k][0]):
                 f = min(reste, v["tps"][k][1]); pnl += f * v["tps"][k][0]; reste -= f
                 evts.append({"t": x[0], "type": f"palier {k + 1}", "part": round(f, 4), "gain": v["tps"][k][0]})
@@ -495,6 +500,8 @@ def main():
                 continue
             h = (maintenant - e["peak_t"]) / 3600
             if h < s["h_min"] or h > 48:
+                continue
+            if (u.get("liq") or 0) < LIQ_MIN or (u.get("vol_h24") or 0) < VOL24_MIN:
                 continue
             # Si on avait déjà vu le token au-dessus du seuil, l'ordre limite aurait été posé et exécuté,
             # même si le prix a ensuite plongé bien plus bas (on compte alors la perte, pour rester honnête).
