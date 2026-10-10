@@ -76,7 +76,7 @@ a{color:var(--acc);text-decoration:none}
 
   <div class="panel controls">
     <label>Stratégie
-      <select id="f-strat"><option value="BGC">B + G + C</option><option value="BG">B + G</option><option value="B">B (-60 %)</option><option value="G" selected>G (-70 %)</option><option value="C">C (convergence KOL)</option></select>
+      <select id="f-strat"><option value="BG" selected>B + G</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option></select>
     </label>
     <label>Sortie
       <select id="f-sortie"></select>
@@ -118,7 +118,7 @@ a{color:var(--acc);text-decoration:none}
   <div class="panel">
     <h2>Comparaison de toutes les variantes (même capital, même mise)</h2>
     <div class="scroll"><table id="t-comp"></table></div>
-    <div class="note">Référence backtest du 8 octobre (sortie 50/x2, stop -60 %) : B +17 % par trade, G +31 % par trade. C (au moins 3 KOLs achètent le même token en moins d'1 h, achat au marché) : pas de backtest, c'est un test en direct.</div>
+    <div class="note">Référence backtest du 8 octobre (sortie 50/x2, stop -60 %) : B +17 % par trade, G +31 % par trade.</div>
   </div>
 
   <div class="grid2">
@@ -218,7 +218,7 @@ function rendre() {
 
   // comparaison
   let h = '<tr><th>Stratégie</th><th>Sortie</th><th>Capital final</th><th>Profit</th><th>Trades clôturés</th><th>Gagnants</th><th>Gain moyen</th><th>Ouvertes</th></tr>';
-  for (const st of ['B', 'G', 'C']) for (const so of Object.keys(DATA.sorties)) {
+  for (const st of ['B', 'G']) for (const so of Object.keys(DATA.sorties)) {
     const r = simuler(filtre(st), so, mise, cap, DATA.frais), d = r.eq - cap;
     h += `<tr><td><span class="tag ${st}">${st}</span></td><td>${nomSortie(so)}</td><td class="n">${usd(r.eq)}</td><td class="n ${cls(d)}">${usd(d)} (${pct(d / cap)})</td>
       <td class="n">${r.n}</td><td class="n">${r.n ? Math.round(100 * r.win / r.n) + ' %' : '–'}</td><td class="n ${cls(r.avg || 0)}">${r.avg == null ? '–' : pct(r.avg)}</td><td class="n">${r.ouvertes}</td></tr>`;

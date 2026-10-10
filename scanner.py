@@ -44,6 +44,7 @@ SORTIES = {
     "moonbag": {"sl": 0.60, "tps": [(0.5, 0.4), (1.0, 0.4)], "suiveur": 0.40, "max_h": 168},
 }
 # Stratégie C : convergence KOL (au moins KOL_MIN KOLs différents achètent le même token en moins d'une heure)
+STRATEGIE_C_ACTIVE = False   # arrêtée le 2026-10-10 : micro-tokens, -29 % par trade sur 42 trades (décision de Nils)
 KOL_MIN = 3
 KOL_ACHAT_MIN_USD = 50
 KOLS_DIR = os.path.join(DATA, "kols")
@@ -400,7 +401,7 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
          f"{stats['gt']} GeckoTerminal ({stats['gt_echecs']} échecs).", "",
          "## Résultats par stratégie et par sortie", "",
          "| Stratégie | Sortie | Trades clôturés | Gagnants | Gain moyen | En cours |", "|---|---|---|---|---|---|"]
-    for st in list(STRATEGIES) + ["C"]:
+    for st in list(STRATEGIES) + (["C"] if STRATEGIE_C_ACTIVE else []):
         for so in SORTIES:
             f = [p["res"][so]["pnl"] for p in fermees if p["strat"] == st]
             o = sum(1 for p in positions if p["strat"] == st)
@@ -448,7 +449,7 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
               "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
               "nouveau_sommet", "mc_actuel", "retard_min", "antirug")
-    trades = [{k: p.get(k) for k in champs} for p in fermees + positions]
+    trades = [{k: p.get(k) for k in champs} for p in fermees + positions if p["strat"] != "C" or STRATEGIE_C_ACTIVE]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
                "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"], "suiveur": v.get("suiveur"), "max_h": v.get("max_h", DUREE_MAX_H)}
                            for k, v in SORTIES.items()},
@@ -536,7 +537,7 @@ def main():
     for x in recents:
         par_token.setdefault(x["tok"], set()).add(x["w"])
     deja_c = {p["token"] for p in positions + fermees if p["strat"] == "C" and maintenant - p["entree_t"] < 24 * 3600}
-    for t, wallets in par_token.items():
+    for t, wallets in (par_token.items() if STRATEGIE_C_ACTIVE else []):
         if len(wallets) < KOL_MIN or t in deja_c:
             continue
         u = univ.get(t)
