@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-10 20:39 UTC)
+# Rapport du scanner (mis à jour le 2026-10-10 20:54 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 2462 (dont 2349 relevés à ce passage). Requêtes : 87 Dexscreener, 0 GeckoTerminal (0 échecs).
+Tokens suivis : 2505 (dont 2389 relevés à ce passage). Requêtes : 88 Dexscreener, 1 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -23,8 +23,8 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [SI276](https://dexscreener.com/solana/12jc1DzJpzbCDaKuM4brAKh9jcFry2TLG1FfGsL4ftCG) | G | 2026-10-10 09:38 | 0.59 M$ | x6.6 | 20 % | +57 % | -30 % | 14550/45733 $ | 0/0 | 2029 → 2110 | ouverte |
-| [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | G | 2026-10-10 07:38 | 0.41 M$ | x5.5 | -43 % | +2 % | -44 % | 25679/84266 $ | 0/0 | 709 → 873 | ouverte |
+| [SI276](https://dexscreener.com/solana/12jc1DzJpzbCDaKuM4brAKh9jcFry2TLG1FfGsL4ftCG) | G | 2026-10-10 09:38 | 0.59 M$ | x6.6 | 24 % | +57 % | -30 % | 14550/45733 $ | 0/0 | 2029 → 2110 | ouverte |
+| [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | G | 2026-10-10 07:38 | 0.41 M$ | x5.5 | -40 % | +2 % | -44 % | 25679/84266 $ | 0/0 | 709 → 873 | ouverte |
 | [MAMDANI](https://dexscreener.com/solana/3shwtXmz4AEDFgKZ5AxHsJxnYrVvnSfapoE3St9GHn7e) | C | 2026-10-10 03:53 | 0.02 M$ | - | -63 % | +-18 % | -70 % | None/None $ | 5/None | None → None | clôturée |
 | [Catbal](https://dexscreener.com/solana/5jkWXATVo5FedxadyM83uFbgXuJ6BB3SVPK1xuRy3NvQ) | C | 2026-10-10 03:23 | 0.01 M$ | - | -63 % | +-52 % | -72 % | None/None $ | 4/None | None → None | clôturée |
 | [10/10](https://dexscreener.com/solana/8dcdshWejyVmk6HidN2Y8jWgMVyTmFqq9tq6bpzJjEeD) | C | 2026-10-10 03:23 | 0.01 M$ | - | 72 % | +256 % | 89 % | None/None $ | 4/None | None → None | clôturée |
