@@ -14,6 +14,7 @@ Tourne toutes les 15 minutes (GitHub Actions). À chaque passage :
 Aucun argent réel, aucun wallet : uniquement de l'observation.
 """
 import csv
+import antirug
 import json
 import os
 import time
@@ -330,6 +331,21 @@ def kol_resume(trades, token, depuis, kol_map):
             "kols_noms": " ".join(sorted({kol_map.get(w, w[:6]) for w in ach}))[:200]}
 
 
+# ---------- 3 ter. Anti-rug ----------
+_budget_antirug = {"n": 0}
+
+
+def analyse_antirug(token):
+    """Bubblemap simplifiée (voir antirug.py). Au plus 4 analyses par relevé pour tenir dans les 15 minutes."""
+    if _budget_antirug["n"] >= 4:
+        return None
+    _budget_antirug["n"] += 1
+    try:
+        return antirug.analyser(token)
+    except Exception as ex:
+        return {"erreur": str(ex)[:100]}
+
+
 # ---------- 4. Suivi des positions ----------
 def evaluer(pos, u, maintenant):
     ent = pos["prix_entree"]
@@ -431,7 +447,7 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     """Fichier léger lu par le site (tableau de bord Vercel)."""
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
               "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
-              "nouveau_sommet", "mc_actuel", "retard_min")
+              "nouveau_sommet", "mc_actuel", "retard_min", "antirug")
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
                "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"], "suiveur": v.get("suiveur"), "max_h": v.get("max_h", DUREE_MAX_H)}
@@ -492,6 +508,7 @@ def main():
             else:
                 continue
             sig = signaux(u, t, e["peak_t"], kol_map)
+            ar = analyse_antirug(t)
             sig.update(kol_resume(flux, t, e["peak_t"], kol_map) if flux else
                        {"kols_acheteurs": None, "kols_vendeurs": None, "kols_achat_usd": None, "kols_vente_usd": None, "kols_noms": ""})
             pos = {"token": t, "pair": u["pair"], "sym": u["sym"], "strat": strat, "entree_t": maintenant,
@@ -500,7 +517,7 @@ def main():
                    "h_vers_entree": round(h, 1), "liq": u.get("liq"), "x": u.get("x"),
                    "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
                    "holders_40": u.get("holders_40") if u.get("h40_peak") == e["peak_t"] else None,
-                   "sig": sig, "contexte": {k: v for k, v in ctx.items() if k != "t"},
+                   "sig": sig, "antirug": ar, "contexte": {k: v for k, v in ctx.items() if k != "t"},
                    "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
             positions.append(pos)
             deja.add((t, strat, e["peak_t"]))
@@ -527,6 +544,7 @@ def main():
             continue   # pas encore de prix pour ce token : il sera pris au relevé suivant s'il est toujours en convergence
         mc = u["pts"][-1][1]
         trois = sorted(x["t"] for x in recents if x["tok"] == t)
+        ar = analyse_antirug(t) if mc >= 100_000 else None
         sig = {"baleines_achat_usd": None, "baleines_vente_usd": None, "baleines_acheteurs": None, "baleines_vendeurs": None,
                "kol_achats": len(wallets), "kol_ventes": None, "kol_noms": "", "holders": None,
                **kol_resume(flux, t, maintenant - 3600, kol_map)}
@@ -535,7 +553,7 @@ def main():
                "pump_x": None, "pump_h": None, "h_vers_entree": None, "liq": u.get("liq"), "x": u.get("x"),
                "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
                "retard_min": round((maintenant - trois[KOL_MIN - 1]) / 60) if len(trois) >= KOL_MIN else None,
-               "holders_40": None, "sig": sig, "contexte": {k: v for k, v in ctx.items() if k != "t"},
+               "holders_40": None, "sig": sig, "antirug": ar, "contexte": {k: v for k, v in ctx.items() if k != "t"},
                "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
         positions.append(pos)
         u["en_position"] = True

@@ -49,6 +49,8 @@ a{color:var(--acc);text-decoration:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr}}
 .note{color:var(--mut);font-size:12px;margin-top:8px}
+.chk span{display:flex;gap:6px;align-items:center;color:var(--txt);font-size:13px}
+.chk span:first-child{color:var(--mut);font-size:12px}
 .top3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
 @media (max-width:760px){.top3{grid-template-columns:1fr}}
 .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
@@ -84,6 +86,10 @@ a{color:var(--acc);text-decoration:none}
     </label>
     <label>Capital de départ
       <input id="f-cap" type="number" value="5000" min="100" step="100" style="width:110px">
+    </label>
+    <label class="chk"><span>Filtres</span>
+      <span><input id="f-rug" type="checkbox" checked> écarter les tokens suspects (anti-rug)</span>
+      <span><input id="f-age" type="checkbox" checked> token de plus de 40 h (B et G)</span>
     </label>
   </div>
 
@@ -181,7 +187,11 @@ function simuler(trades, sortie, mise, cap, frais) {
   return {eq, courbe, journal, n: pnls.length, win: pnls.filter(v => v > 0).length, avg: pnls.length ? pnls.reduce((a, b) => a + b, 0) / pnls.length : null, ouvertes: taille.size};
 }
 
-function filtre(strat) { return DATA.trades.filter(p => strat.includes(p.strat)); }
+function suspect(p) { return !!(p.antirug && p.antirug.suspect); }
+function filtre(strat) {
+  const rug = $('f-rug').checked, age = $('f-age').checked;
+  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && p.strat !== 'C' && p.age_h != null && p.age_h < 40));
+}
 
 function rendre() {
   const strat = $('f-strat').value, sortie = $('f-sortie').value, mise = +$('f-mise').value, cap = +$('f-cap').value || 5000;
@@ -227,7 +237,7 @@ function rendre() {
     if (j.type === 'achat') {
       const why = [`sommet ${mc(p.peak)} → ${p.ordre_limite ? 'ordre limite' : 'achat au marché'} à ${mc(p.prix_entree)}`, `pump x${p.pump_x} en ${p.pump_h} h`, `chute en ${p.h_vers_entree} h`,
         `baleines ${sig.baleines_achat_usd ?? '?'} $ achetés / ${sig.baleines_vente_usd ?? '?'} $ vendus`, `KOLs ${sig.kol_achats ?? '?'} achats / ${sig.kol_ventes ?? '?'} ventes${sig.kol_noms ? ' (' + sig.kol_noms + ')' : ''}`,
-        `holders ${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}`].join(' · ');
+        `holders ${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}`, verdict(p)].filter(Boolean).join(' · ');
       return ev(j.t, '#8b5cf6', `<b>Achat</b> <a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a> <span class="tag ${p.strat}">${p.strat}</span> · ${usd(j.size)}`, why);
     }
     if (j.type === 'skip') return ev(j.t, '#8a91a5', `Signal ignoré : ${esc(p.sym)} (capital insuffisant)`, '');
@@ -244,12 +254,12 @@ function rendre() {
   }).join('') : '<tr><td class="empty">Aucune position ouverte.</td></tr>';
 
   // tous les trades
-  const tous = filtre(strat).sort((a, b) => b.entree_t - a.entree_t);
-  $('t-all').innerHTML = tous.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>Sommet</th><th>MC entrée</th><th>Pump</th><th>Résultat</th><th>Plus haut</th><th>Plus bas</th><th>Baleines A/V</th><th>KOLs A/V</th><th>Holders</th><th>Statut</th></tr>' + tous.map(p => {
+  const tous = DATA.trades.filter(p => strat.includes(p.strat)).sort((a, b) => b.entree_t - a.entree_t);
+  $('t-all').innerHTML = tous.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>Sommet</th><th>MC entrée</th><th>Pump</th><th>Résultat</th><th>Plus haut</th><th>Plus bas</th><th>Baleines A/V</th><th>KOLs A/V</th><th>Holders</th><th>Anti-rug</th><th>Statut</th></tr>' + tous.map(p => {
     const r = p.res[sortie], sig = p.sig || {};
     return `<tr><td><a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a></td><td><span class="tag ${p.strat}">${p.strat}</span></td><td class="n">${fmtT(p.entree_t)}</td><td class="n">${mc(p.peak)}</td><td class="n">${mc(p.prix_entree)}</td>
       <td class="n">${p.pump_x ? 'x' + p.pump_x : '–'}</td><td class="n ${cls(r.pnl)}">${pct(r.pnl)}</td><td class="n up">${p.haut != null ? pct(p.haut) : '–'}</td><td class="n down">${p.bas != null ? pct(p.bas) : '–'}</td>
-      <td class="n">${sig.baleines_achat_usd ?? '?'} / ${sig.baleines_vente_usd ?? '?'}</td><td class="n">${sig.kols_acheteurs ?? sig.kol_achats ?? '?'} / ${sig.kols_vendeurs ?? sig.kol_ventes ?? '?'}</td><td class="n">${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}</td><td>${r.ferme ? 'clôturé' : '<span class="up">ouvert</span>'}</td></tr>`;
+      <td class="n">${sig.baleines_achat_usd ?? '?'} / ${sig.baleines_vente_usd ?? '?'}</td><td class="n">${sig.kols_acheteurs ?? sig.kol_achats ?? '?'} / ${sig.kols_vendeurs ?? sig.kol_ventes ?? '?'}</td><td class="n">${p.holders_40 ?? '?'} → ${sig.holders ?? '?'}</td><td title="${p.antirug && p.antirug.raisons ? esc(p.antirug.raisons) : ''}">${!p.antirug ? '–' : suspect(p) ? '<span class="down">⚠ suspect</span>' : '<span class="up">OK</span>'}</td><td>${r.ferme ? 'clôturé' : '<span class="up">ouvert</span>'}</td></tr>`;
   }).join('') : '<tr><td class="empty">Aucun trade pour l\'instant.</td></tr>';
 }
 
@@ -266,6 +276,11 @@ function rendreRadar() {
   }).join('') : '<div class="empty" style="grid-column:1/-1">Aucun token ne fait le pattern en ce moment.</div>';
   $('t-radar').innerHTML = R.length > 3 ? '<tr><th>Token</th><th>Baisse depuis le sommet</th><th>Sommet</th><th>MC actuelle</th><th>Pump</th><th>Depuis le sommet</th><th>Stratégies</th></tr>' + R.slice(3).map(r =>
     `<tr><td>${lien(r)}</td><td class="n down">-${Math.round(r.baisse * 100)} %</td><td class="n">${mc(r.sommet)}</td><td class="n">${mc(r.mc)}</td><td class="n">x${r.pump_x}</td><td class="n">${r.h_depuis_sommet} h</td><td>${r.strategies}</td></tr>`).join('') : '';
+}
+
+function verdict(p) {
+  const a = p.antirug; if (!a) return 'anti-rug : non analysé'; if (a.erreur) return 'anti-rug : erreur';
+  return a.suspect ? `⚠ anti-rug : ${esc(a.raisons)}` : `anti-rug OK (plus gros groupe relié : ${a.groupe_max_wallets} wallets, ${a.groupe_max_pct} %)`;
 }
 
 function ev(t, couleur, txt, why) { return `<div class="ev"><div class="t">${fmtT(t)}</div><div class="dot" style="background:${couleur}"></div><div class="d">${txt}${why ? `<div class="why">${why}</div>` : ''}</div></div>`; }
@@ -285,7 +300,7 @@ async function charger() {
     rendre();
   } catch (e) { $('maj').textContent = 'Données indisponibles pour le moment.'; }
 }
-for (const id of ['f-strat', 'f-sortie', 'f-mise', 'f-cap']) $(id).addEventListener('change', () => DATA && rendre());
+for (const id of ['f-strat', 'f-sortie', 'f-mise', 'f-cap', 'f-rug', 'f-age']) $(id).addEventListener('change', () => DATA && rendre());
 charger(); setInterval(charger, 60000);
 </script>
 </body>
