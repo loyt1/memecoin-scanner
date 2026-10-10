@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-10 23:09 UTC)
+# Rapport du scanner (mis à jour le 2026-10-10 23:24 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 2704 (dont 2476 relevés à ce passage). Requêtes : 95 Dexscreener, 16 GeckoTerminal (0 échecs).
+Tokens suivis : 2718 (dont 2477 relevés à ce passage). Requêtes : 95 Dexscreener, 0 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -77,7 +77,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [API](https://dexscreener.com/solana/4AYdMCxwpeu6L5HCy8xa6maquchFLMWY6XtuXqYfhB6z) | C | 2026-10-09 22:08 | 0.08 M$ | - | 72 % | +111 % | -20 % | None/None $ | 3/None | None → None | clôturée |
 | [VOID](https://dexscreener.com/solana/GwxBUdvmbqWBHWgCf2hXp8e8qvwj9Hx7Nbp46aRSbVBf) | C | 2026-10-09 22:08 | 0.01 M$ | - | -63 % | +18 % | -60 % | None/None $ | 3/None | None → None | clôturée |
 | [Pairly](https://dexscreener.com/solana/EfTDhHVwz9sWRBeA2jidSTVygyMPyUev4bdhzt5BHMyM) | C | 2026-10-09 22:08 | 0.0 M$ | - | -25 % | +-5 % | -22 % | None/None $ | 3/None | None → None | ouverte |
-| [Aioli](https://dexscreener.com/solana/BYNvssF4HGFonnpFnXgei3Hd9XUFBvwAH1ZUapz9VtZV) | C | 2026-10-09 22:08 | 0.0 M$ | - | -51 % | +-20 % | -48 % | None/None $ | 4/None | None → None | ouverte |
+| [Aioli](https://dexscreener.com/solana/BYNvssF4HGFonnpFnXgei3Hd9XUFBvwAH1ZUapz9VtZV) | C | 2026-10-09 22:08 | 0.0 M$ | - | -52 % | +-20 % | -49 % | None/None $ | 4/None | None → None | ouverte |
 | [Aioli](https://dexscreener.com/solana/7qTUPdyLKGLuF6RntuUYxyPEJSs539ewwUZcRxtyLW7B) | C | 2026-10-09 22:08 | 0.0 M$ | - | -24 % | +-7 % | -30 % | None/None $ | 5/None | None → None | ouverte |
 | [ED](https://dexscreener.com/solana/5gtoXLESuF1UmgkUUtwFhbfUo9v6VzZ5yHZXcMkigsms) | C | 2026-10-09 22:08 | 0.0 M$ | - | -16 % | +12 % | -13 % | None/None $ | 3/None | None → None | ouverte |
 | [BEANOS](https://dexscreener.com/solana/ETZb8tsnGoa4BYf9QqNFfhgAgy6xYsPvtXWQpFrFKG3e) | C | 2026-10-09 22:08 | 0.0 M$ | - | -34 % | +-30 % | -31 % | None/None $ | 3/None | None → None | ouverte |
