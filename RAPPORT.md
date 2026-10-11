@@ -1,17 +1,17 @@
-# Rapport du scanner (mis à jour le 2026-10-11 15:14 UTC)
+# Rapport du scanner (mis à jour le 2026-10-11 15:29 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 3635 (dont 2934 relevés à ce passage). Requêtes : 126 Dexscreener, 15 GeckoTerminal (0 échecs).
+Tokens suivis : 3651 (dont 2947 relevés à ce passage). Requêtes : 126 Dexscreener, 3 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
 | Stratégie | Sortie | Trades clôturés | Gagnants | Gain moyen | En cours |
 |---|---|---|---|---|---|
-| B | 50_x2_sl60 | 0 | - | - | 0 |
-| B | 30_60_sl60 | 0 | - | - | 0 |
-| B | 50_x2_sl30 | 0 | - | - | 0 |
-| B | moonbag | 0 | - | - | 0 |
+| B | 50_x2_sl60 | 0 | - | - | 1 |
+| B | 30_60_sl60 | 0 | - | - | 1 |
+| B | 50_x2_sl30 | 0 | - | - | 1 |
+| B | moonbag | 0 | - | - | 1 |
 | G | 50_x2_sl60 | 1 | 0 % | -102.0 % | 2 |
 | G | 30_60_sl60 | 1 | 0 % | -102.0 % | 2 |
 | G | 50_x2_sl30 | 1 | 0 % | -36.6 % | 2 |
@@ -27,7 +27,8 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | H | 2026-10-11 14:29 | 0.19 M$ | x5.5 | -2 % | +1 % | 0 % | 0/0 $ | 0/0 | 709 → 848 | ouverte |
+| [DARK](https://dexscreener.com/solana/Cprsvqk2riV3WmTewKK9m6cm62zaAqLDArAbBmN3pe4f) | B | 2026-10-11 15:29 | 2.9 M$ | x2.4 | -3 % | +0 % | 0 % | 3191/4611 $ | 0/0 | 8802 → 8677 | ouverte |
+| [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | H | 2026-10-11 14:29 | 0.19 M$ | x5.5 | -3 % | +1 % | 0 % | 0/0 $ | 0/0 | 709 → 848 | ouverte |
 | [SI276](https://dexscreener.com/solana/12jc1DzJpzbCDaKuM4brAKh9jcFry2TLG1FfGsL4ftCG) | G | 2026-10-10 09:38 | 0.59 M$ | x6.6 | 72 % | +109 % | -30 % | 14550/45733 $ | 0/0 | 2029 → 2110 | ouverte |
 | [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | G | 2026-10-10 07:38 | 0.41 M$ | x5.5 | -56 % | +2 % | -55 % | 25679/84266 $ | 0/0 | 709 → 873 | ouverte |
 | [MAMDANI](https://dexscreener.com/solana/3shwtXmz4AEDFgKZ5AxHsJxnYrVvnSfapoE3St9GHn7e) | C | 2026-10-10 03:53 | 0.02 M$ | - | -63 % | +-18 % | -70 % | None/None $ | 5/None | None → None | clôturée |
