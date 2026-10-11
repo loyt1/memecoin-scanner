@@ -6,7 +6,7 @@ TOK = charger_gradues()
 for t in TOK.values():
     precalc(t)
 tous_t = sorted(e[0] for tok in TOK.values() for e in tok['c'])
-COUPE = float(sys.argv[1]) if len(sys.argv) > 1 else None
+COUPE = float(sys.argv[1]) if len(sys.argv) > 1 else (tous_t[0] + tous_t[-1]) / 2   # milieu de la période
 print(len(TOK), 'tokens', flush=True)
 BASE = {'sommet_min': 1e6, 'sommet_max': 15e6, 'pump_min': 2, 'vol_min': 10_000}
 ENTREES = {}
