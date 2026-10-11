@@ -14,3 +14,4 @@ data/contexte.csv
 data/contexte.json
 antirug.py
 bilan.py
+backtest
