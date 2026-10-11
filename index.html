@@ -38,7 +38,7 @@ td.n{font-family:"JetBrains Mono",monospace;white-space:nowrap}
 .scroll{overflow-x:auto}
 a{color:var(--acc);text-decoration:none}
 .tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
-.tag.B{color:#60a5fa}.tag.G{color:#c084fc}.tag.C{color:#34d399}
+.tag.B{color:#60a5fa}.tag.G{color:#c084fc}.tag.H{color:#fbbf24}.tag.C{color:#34d399}
 .journal{max-height:520px;overflow-y:auto}
 .ev{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
 .ev .t{color:var(--mut);font:12px "JetBrains Mono",monospace;min-width:92px}
@@ -76,7 +76,7 @@ a{color:var(--acc);text-decoration:none}
 
   <div class="panel controls">
     <label>Stratégie
-      <select id="f-strat"><option value="BG" selected>B + G</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option></select>
+      <select id="f-strat"><option value="BGH" selected>B + G + H</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option><option value="H">H (-80 %)</option></select>
     </label>
     <label>Sortie
       <select id="f-sortie"></select>
@@ -190,7 +190,7 @@ function simuler(trades, sortie, mise, cap, frais) {
 function suspect(p) { return !!(p.antirug && p.antirug.suspect); }
 function filtre(strat) {
   const rug = $('f-rug').checked, age = $('f-age').checked;
-  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && p.strat !== 'C' && p.age_h != null && p.age_h < 40));
+  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40));
 }
 
 function rendre() {
@@ -218,7 +218,7 @@ function rendre() {
 
   // comparaison
   let h = '<tr><th>Stratégie</th><th>Sortie</th><th>Capital final</th><th>Profit</th><th>Trades clôturés</th><th>Gagnants</th><th>Gain moyen</th><th>Ouvertes</th></tr>';
-  for (const st of ['B', 'G']) for (const so of Object.keys(DATA.sorties)) {
+  for (const st of ['B', 'G', 'H']) for (const so of Object.keys(DATA.sorties)) {
     const r = simuler(filtre(st), so, mise, cap, DATA.frais), d = r.eq - cap;
     h += `<tr><td><span class="tag ${st}">${st}</span></td><td>${nomSortie(so)}</td><td class="n">${usd(r.eq)}</td><td class="n ${cls(d)}">${usd(d)} (${pct(d / cap)})</td>
       <td class="n">${r.n}</td><td class="n">${r.n ? Math.round(100 * r.win / r.n) + ' %' : '–'}</td><td class="n ${cls(r.avg || 0)}">${r.avg == null ? '–' : pct(r.avg)}</td><td class="n">${r.ouvertes}</td></tr>`;

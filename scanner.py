@@ -6,7 +6,7 @@ Tourne toutes les 15 minutes (GitHub Actions). À chaque passage :
 2. Relevé : prix et market cap de tous les tokens suivis (Dexscreener, 30 par requête).
    Le bot construit ainsi son propre historique (un point toutes les 15 min).
 3. Détection : pump récent (x2 minimum en 48 h, sommet entre 1 et 15 M$), puis
-   retracement qui touche -60 % (B) ou -70 % (G) → position fictive au prix limite,
+   retracement qui touche -60 % (B), -70 % (G) ou -80 % (H) → position fictive au prix limite,
    avec les signaux du moment (baleines, KOLs, holders, achats/ventes).
 4. Suivi des positions : paliers de vente, stop, sortie après 72 h.
 5. Rapport : RAPPORT.md.
@@ -34,6 +34,9 @@ STRATEGIES = {
     # entrée sous le sommet, pump maximum, heures minimum entre le sommet et l'entrée
     "B": {"dd": 0.60, "pump_max": 5, "h_min": 0},
     "G": {"dd": 0.70, "pump_max": 10, "h_min": 2},
+    # H (ajoutée le 2026-10-11) : « capitulation ». Seule zone positive des deux backtests sans biais du 11/10
+    # (+12 % par token sur 24 tokens pump.fun, intervalle -6 % / +30 % : pas une preuve, d'où le test en direct)
+    "H": {"dd": 0.80, "pump_max": 30, "h_min": 1},
 }
 # Variantes de sortie suivies en parallèle pour chaque position
 SORTIES = {

@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(ICI, "data")
-BACKTEST = {"B": 0.17, "G": 0.31}       # gain moyen par trade du backtest (sortie 50_x2_sl60)
+BACKTEST = {"B": 0.17, "G": 0.31, "H": 0.12}       # gain moyen par trade du backtest (sortie 50_x2_sl60)
 SORTIE_REF = "50_x2_sl60"
 
 
@@ -52,8 +52,8 @@ def capital(trades, sortie, mise=0.05, depart=5000):
 
 
 def main():
-    fermees = [p for p in charger("fermees.json") if p["strat"] in ("B", "G")]
-    ouvertes = [p for p in charger("positions.json") if p["strat"] in ("B", "G")]
+    fermees = [p for p in charger("fermees.json") if p["strat"] in ("B", "G", "H")]
+    ouvertes = [p for p in charger("positions.json") if p["strat"] in ("B", "G", "H")]
     invalides = charger("invalides.json")
     sorties = list(fermees[0]["res"]) if fermees else [SORTIE_REF]
     jour = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -63,11 +63,11 @@ def main():
          "## 1. Résultats contre le backtest", "",
          "| Stratégie | Sortie | Trades | Gagnants | Gain moyen | Médiane | Pire | Meilleur | Backtest | 5000 $ deviennent |",
          "|---|---|---|---|---|---|---|---|---|---|"]
-    for st in ("B", "G"):
+    for st in ("B", "G", "H"):
         t = [p for p in fermees if p["strat"] == st]
         for so in sorties:
             g = [p["res"][so]["pnl"] for p in t]
-            bt = f"+{round(100 * BACKTEST[st])} %" if so == SORTIE_REF else ""
+            bt = f"+{round(100 * BACKTEST[st])} %" if so == SORTIE_REF else ""   # H : backtest sans biais du 11/10
             L.append(f"| {st} | {so} " + stats(g) + f" {bt} | {capital(t, so)} $ |")
     L += ["", "## 2. Quel filtre aurait aidé ? (B et G ensemble, sortie 50 % / x2, stop -60 %)", ""]
     T = fermees
