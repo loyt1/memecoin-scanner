@@ -289,8 +289,11 @@ function nomSortie(k) { const v = DATA.sorties[k]; let n = v.tps.map(t => '+' + 
 
 async function charger() {
   try {
-    const r = await fetch('data/tableau.json?_=' + Date.now(), {cache: 'no-store'});
-    DATA = await r.json();
+    // Données lues directement sur GitHub (à jour à chaque relevé, sans redéployer le site) ; copie du site en secours.
+    // Si le dépôt repasse en privé, seule la copie du site restera lisible.
+    const lire = url => fetch(url + '?_=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).catch(() => null);
+    const [gh, local] = await Promise.all([lire('https://raw.githubusercontent.com/loyt1/memecoin-scanner/main/data/tableau.json'), lire('data/tableau.json')]);
+    DATA = [gh, local].filter(Boolean).sort((a, b) => b.maj - a.maj)[0];
     const sel = $('f-sortie'), garde = sel.value;
     sel.innerHTML = Object.keys(DATA.sorties).map(k => `<option value="${k}">${nomSortie(k)}</option>`).join('');
     if (garde) sel.value = garde;

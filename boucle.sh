@@ -25,9 +25,9 @@ while [ "$(date +%s)" -lt "$fin" ]; do
   git pull -q --rebase --autostash || true
   python scanner.py || echo "erreur pendant le relevé"
   git add -A data RAPPORT.md
-  # le site Vercel se met à jour un relevé sur deux (toutes les 30 min, limite de 100 déploiements par jour)
+  # le site lit les données directement sur GitHub ; on ne redéploie la copie Vercel que toutes les 2 h (limite de 100 déploiements par jour)
   n=$((n + 1)); tag=""
-  if [ $((n % 2)) -eq 1 ]; then tag=" [deploy]"; fi
+  if [ $((n % 8)) -eq 1 ]; then tag=" [deploy]"; fi
   git diff --cached --quiet || git commit -qm "scan $(date -u +'%Y-%m-%d %H:%M')$tag"
   git push -q || { git pull -q --rebase --autostash && git push -q; } || echo "envoi raté, nouvel essai au prochain relevé"
   reste=$(( 900 - ($(date +%s) - debut) ))
