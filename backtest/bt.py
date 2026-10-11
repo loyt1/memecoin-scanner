@@ -89,7 +89,11 @@ def signaux_entree(tok, s):
             continue
         if vol24 < s.get('vol_min', 10_000):
             continue
-        out.append({'i': i + 1, 't': n[0], 'prix': min(lim, n[1]), 'pk': pk, 'pk_t': pk_t, 'pump': pump,
+        prix = min(lim, n[1])
+        if s.get('declencheur') and n[4] < lim * 0.7:
+            # ordre déclencheur (GMGN) : il se déclenche pendant la chute et achète au marché, après la chute
+            prix = n[4]
+        out.append({'i': i + 1, 't': n[0], 'prix': prix, 'pk': pk, 'pk_t': pk_t, 'pump': pump,
                     'age': (T - tok['debut']) / 3600, 'h': (n[0] - pk_t) / 3600, 'vol24': vol24,
                     'apres_vu': tok['vu'] is not None and n[0] >= tok['vu']})
         deja.add(pk_t)
@@ -151,7 +155,7 @@ def charger_gradues():
     toks = {}
     for t, c in O.items():
         x = A.get(t) or {}
-        if len(c) < 20:
+        if len(c) < 2:
             continue
         c = sorted(c)
         toks[t] = {'sym': x.get('symbol'), 'c': [[b[0], b[1] * 1e9, b[2] * 1e9, b[3] * 1e9, b[4] * 1e9, b[5]] for b in c],

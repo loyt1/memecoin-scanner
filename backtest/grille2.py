@@ -29,6 +29,8 @@ SORTIES = {
     'x2_x3_sl60': {'sl': 0.6, 'tps': [(1.0, 0.5), (2.0, 0.5)], 'max_h': 168},
     'moonbag': {'sl': 0.6, 'tps': [(0.5, 0.4), (1.0, 0.4)], 'suiveur': 0.4, 'max_h': 168},
 }
+for k in list(ENTREES):
+    ENTREES[k + '_decl'] = {**ENTREES[k], 'declencheur': True}
 res = []
 for ne, s in ENTREES.items():
     ents = [(t, e) for t, tok in TOK.items() for e in signaux_entree(tok, s)]
