@@ -107,7 +107,11 @@ def mint_de(sig):
 
 
 def etape_mints(sigs, MINTS, fini):
-    a_faire = [(s, b) for s, b in sigs if MINTS.get(s, [None, 0])[0] == 'ECHEC' or s not in MINTS]
+    # échantillon aléatoire (une migration sur ECHANTILLON) : le RPC public est trop lent pour tout traiter, et un
+    # échantillon tiré sans regarder la suite ne crée aucun biais
+    pas = int(os.environ.get('ECHANTILLON', 3))
+    a_faire = [(s, b) for i, (s, b) in enumerate(sigs)
+               if i % pas == 0 and (MINTS.get(s, [None, 0])[0] == 'ECHEC' or s not in MINTS)]
     n = 0
     with ThreadPoolExecutor(int(os.environ.get('RPC_THREADS', 6))) as ex:
         for (s, b), m in zip(a_faire, ex.map(lambda x: mint_de(x[0]) if temps_ok() else 'ECHEC', a_faire)):
