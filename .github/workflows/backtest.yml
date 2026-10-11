@@ -1,0 +1,39 @@
+name: backtest
+# Grand backtest sans biais (branche backtest). Ne touche pas au bot de main.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: backtest
+jobs:
+  donnees:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: backtest
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Donnees puis grille
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIMITE_MIN: "320"
+        run: |
+          git config user.name "backtest-bot"
+          git config user.email "backtest-bot@users.noreply.github.com"
+          cd backtest
+          python pipeline.py | tee ../pipeline.log
+          if grep -q "^COMPLET" ../pipeline.log; then
+            python grille2.py
+            git add -A etat
+            git commit -qm "backtest : resultats de la grille" || true
+            git pull -q --rebase origin backtest
+            git push -q origin HEAD:backtest
+          else
+            gh workflow run backtest.yml --ref main
+          fi
