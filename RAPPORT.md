@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-11 14:24 UTC)
+# Rapport du scanner (mis à jour le 2026-10-11 14:29 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 3569 (dont 2902 relevés à ce passage). Requêtes : 123 Dexscreener, 1 GeckoTerminal (0 échecs).
+Tokens suivis : 3571 (dont 2905 relevés à ce passage). Requêtes : 124 Dexscreener, 3 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -16,6 +16,10 @@ Tokens suivis : 3569 (dont 2902 relevés à ce passage). Requêtes : 123 Dexscre
 | G | 30_60_sl60 | 1 | 0 % | -102.0 % | 2 |
 | G | 50_x2_sl30 | 1 | 0 % | -36.6 % | 2 |
 | G | moonbag | 1 | 0 % | -102.0 % | 2 |
+| H | 50_x2_sl60 | 0 | - | - | 1 |
+| H | 30_60_sl60 | 0 | - | - | 1 |
+| H | 50_x2_sl30 | 0 | - | - | 1 |
+| H | moonbag | 0 | - | - | 1 |
 
 Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trade.
 
@@ -23,7 +27,8 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [SI276](https://dexscreener.com/solana/12jc1DzJpzbCDaKuM4brAKh9jcFry2TLG1FfGsL4ftCG) | G | 2026-10-10 09:38 | 0.59 M$ | x6.6 | 63 % | +91 % | -30 % | 14550/45733 $ | 0/0 | 2029 → 2110 | ouverte |
+| [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | H | 2026-10-11 14:29 | 0.19 M$ | x5.5 | -3 % | +0 % | 0 % | 0/0 $ | 0/0 | 709 → 848 | ouverte |
+| [SI276](https://dexscreener.com/solana/12jc1DzJpzbCDaKuM4brAKh9jcFry2TLG1FfGsL4ftCG) | G | 2026-10-10 09:38 | 0.59 M$ | x6.6 | 64 % | +91 % | -30 % | 14550/45733 $ | 0/0 | 2029 → 2110 | ouverte |
 | [PLAY](https://dexscreener.com/solana/F3XBLXejAn8YBS3qQao4u4fiijH4eaiHw7F68ovLz5Fq) | G | 2026-10-10 07:38 | 0.41 M$ | x5.5 | -56 % | +2 % | -55 % | 25679/84266 $ | 0/0 | 709 → 873 | ouverte |
 | [MAMDANI](https://dexscreener.com/solana/3shwtXmz4AEDFgKZ5AxHsJxnYrVvnSfapoE3St9GHn7e) | C | 2026-10-10 03:53 | 0.02 M$ | - | -63 % | +-18 % | -70 % | None/None $ | 5/None | None → None | clôturée |
 | [Catbal](https://dexscreener.com/solana/5jkWXATVo5FedxadyM83uFbgXuJ6BB3SVPK1xuRy3NvQ) | C | 2026-10-10 03:23 | 0.01 M$ | - | -63 % | +-52 % | -72 % | None/None $ | 4/None | None → None | clôturée |
