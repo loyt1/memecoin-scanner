@@ -487,6 +487,8 @@ def main():
         if p.get("peak") and (k not in dernier_pic or p["entree_t"] > dernier_pic[k][1]):
             dernier_pic[k] = (p["peak"], p["entree_t"])
     ouvertes = {(p["token"], p["strat"]) for p in positions}
+    p_refus = os.path.join(DATA, "refus_profil.csv")
+    refus = {(r["token"], r["strat"]) for r in csv.DictReader(open(p_refus))} if os.path.exists(p_refus) else set()
     kol_map = kols()
     for p in positions:
         if p["token"] in univ:
@@ -521,6 +523,14 @@ def main():
             if h < s["h_min"] or h > 48:
                 continue
             if (u.get("liq") or 0) < LIQ_MIN or (u.get("vol_h24") or 0) < VOL24_MIN:
+                continue
+            # Règle de Nils (2026-10-12) : pas de profil Dexscreener payé = token non validé. Dans le backtest sans biais,
+            # presque tous les rugs instantanés n'en avaient pas. Les refus sont notés pour vérifier la règle au bilan.
+            if not u.get("profil"):
+                if (t, strat) not in refus:
+                    refus.add((t, strat))
+                    ajouter_csv("refus_profil.csv", {"date": iso(maintenant), "token": t, "sym": u.get("sym"), "strat": strat,
+                                                     "mc_sommet": round(e["peak"]), "mc": round(e["mc"]), "liquidite": u.get("liq")})
                 continue
             # Si on avait déjà vu le token au-dessus du seuil, l'ordre limite aurait été posé et exécuté,
             # même si le prix a ensuite plongé bien plus bas (on compte alors la perte, pour rester honnête).
