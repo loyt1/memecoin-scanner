@@ -9,7 +9,7 @@ Tourne toutes les 15 minutes (GitHub Actions). À chaque passage :
    retracement qui touche -60 % (B), -70 % (G) ou -80 % (H) → position fictive au prix limite,
    avec les signaux du moment (baleines, KOLs, holders, achats/ventes).
 4. Suivi des positions : paliers de vente, stop, sortie après 72 h.
-5. Rapport : RAPPORT.md.
+5. Rapport : data/RAPPORT.md (branche data du dépôt).
 
 Aucun argent réel, aucun wallet : uniquement de l'observation.
 """
@@ -433,7 +433,7 @@ def rapport(positions, fermees, maintenant, n_univ, n_rel):
                  f"+{round(100 * p.get('haut', 0))} % | {round(100 * p.get('bas', 0))} % | "
                  f"{s['baleines_achat_usd']}/{s['baleines_vente_usd']} $ | {s['kol_achats']}/{s['kol_ventes']} | "
                  f"{p.get('holders_40')} → {s['holders']} | {statut} |")
-    open(os.path.join(ICI, "RAPPORT.md"), "w").write("\n".join(L) + "\n")
+    open(os.path.join(DATA, "RAPPORT.md"), "w").write("\n".join(L) + "\n")
 
 
 def radar(univ, maintenant):

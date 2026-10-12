@@ -9,7 +9,7 @@ Bot qui tourne toutes les 15 minutes sur GitHub Actions et teste **en direct, sa
 - Au moment de l'entrée, le bot note : achats/ventes des baleines (> 2000 $) depuis le sommet, trades des KOLs (liste KOLscan dans `kols.csv`), nombre de holders, compte X.
 
 ## Fichiers
-- `RAPPORT.md` : le tableau de bord, mis à jour à chaque passage.
+- `RAPPORT.md` (branche `data`) : le rapport, mis à jour à chaque passage. Toutes les données du bot sont sur la branche `data` (dossier `data/` en local, via `git worktree add data data`), pour que Vercel ne réagisse qu'aux changements de code.
 - `data/entrees.csv` : chaque entrée avec ses signaux.
 - `data/sorties.csv` : le résultat de chaque trade clôturé.
 - `data/positions.json`, `data/fermees.json` : l'état du bot.

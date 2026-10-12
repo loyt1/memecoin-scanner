@@ -10,5 +10,11 @@
         }
       ]
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "data": false,
+      "backtest": false
+    }
+  }
 }
