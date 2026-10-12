@@ -477,6 +477,14 @@ def main():
     positions = charger("positions.json", [])
     fermees = charger("fermees.json", [])
     deja = {(p["token"], p["strat"], p["peak_t"]) for p in positions + fermees}
+    # Dernier sommet acheté par token et stratégie. Le sommet « des 48 dernières heures » glisse quand le vrai sommet
+    # sort de la fenêtre : sans ce garde-fou, le bot rachetait le même token qui descend à chaque relevé (PQC 5 fois).
+    dernier_pic = {}
+    for p in positions + fermees:
+        k = (p["token"], p["strat"])
+        if p.get("peak") and (k not in dernier_pic or p["entree_t"] > dernier_pic[k][1]):
+            dernier_pic[k] = (p["peak"], p["entree_t"])
+    ouvertes = {(p["token"], p["strat"]) for p in positions}
     kol_map = kols()
     for p in positions:
         if p["token"] in univ:
@@ -500,6 +508,12 @@ def main():
             u["h40_peak"], u["holders_40"] = e["peak_t"], holders(t)
         for strat, s in STRATEGIES.items():
             if e["pump_x"] > s["pump_max"] or e["dd"] < s["dd"] or (t, strat, e["peak_t"]) in deja:
+                continue
+            # une seule position à la fois, et pas de nouvelle entrée sans un nouveau sommet plus haut (dans les 7 jours)
+            if (t, strat) in ouvertes:
+                continue
+            dp = dernier_pic.get((t, strat))
+            if dp and maintenant - dp[1] < 7 * 86400 and e["peak"] <= dp[0]:
                 continue
             h = (maintenant - e["peak_t"]) / 3600
             if h < s["h_min"] or h > 48:
@@ -532,6 +546,8 @@ def main():
                    "res": {k: {"ferme": False, "pnl": -FRAIS} for k in SORTIES}}
             positions.append(pos)
             deja.add((t, strat, e["peak_t"]))
+            ouvertes.add((t, strat))
+            dernier_pic[(t, strat)] = (e["peak"], maintenant)
             ajouter_csv("entrees.csv", {"date": iso(maintenant), "token": t, "sym": u["sym"], "strat": strat,
                                         "mc_sommet": round(e["peak"]), "mc_entree": round(pos["prix_entree"]),
                                         "mc_reel": round(e["mc"]), "pump_x": pos["pump_x"], "pump_h": pos["pump_h"],
