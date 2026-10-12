@@ -233,6 +233,8 @@ def relever(univ, maintenant):
                   "vol_h1": (p.get("volume") or {}).get("h1"), "vol_h24": (p.get("volume") or {}).get("h24"),
                   "tx_h1": tx.get("h1"), "tx_h6": tx.get("h6"),
                   "x": any(s.get("type") == "twitter" for s in (p.get("info") or {}).get("socials", [])),
+                  # profil Dexscreener payé et site web : dans le backtest du 12/10, presque tous les rugs instantanés n'en ont pas
+                  "profil": bool((p.get("info") or {}).get("imageUrl")), "site": bool((p.get("info") or {}).get("websites")),
                   "maj": maintenant})
         if mc > 100_000:
             u["vu"] = maintenant
@@ -455,7 +457,7 @@ def radar(univ, maintenant):
 def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     """Fichier léger lu par le site (tableau de bord Vercel)."""
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
-              "pump_x", "pump_h", "h_vers_entree", "liq", "x", "age_h", "holders_40", "sig", "res", "haut", "bas",
+              "pump_x", "pump_h", "h_vers_entree", "liq", "x", "profil", "site", "age_h", "holders_40", "sig", "res", "haut", "bas",
               "nouveau_sommet", "mc_actuel", "retard_min", "antirug")
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions if p["strat"] != "C" or STRATEGIE_C_ACTIVE]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
@@ -540,6 +542,7 @@ def main():
                    "prix_entree": prix, "ordre_limite": prix == limite, "mc_reel": e["mc"], "peak": e["peak"], "peak_t": e["peak_t"],
                    "pump_x": round(e["pump_x"], 2), "pump_h": round((e["peak_t"] - e["pre_t"]) / 3600, 1),
                    "h_vers_entree": round(h, 1), "liq": u.get("liq"), "x": u.get("x"),
+                   "profil": u.get("profil"), "site": u.get("site"),
                    "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
                    "holders_40": u.get("holders_40") if u.get("h40_peak") == e["peak_t"] else None,
                    "sig": sig, "antirug": ar, "contexte": {k: v for k, v in ctx.items() if k != "t"},
@@ -552,7 +555,7 @@ def main():
                                         "mc_sommet": round(e["peak"]), "mc_entree": round(pos["prix_entree"]),
                                         "mc_reel": round(e["mc"]), "pump_x": pos["pump_x"], "pump_h": pos["pump_h"],
                                         "h_vers_entree": pos["h_vers_entree"], "age_h": pos["age_h"],
-                                        "liquidite": u.get("liq"), "compte_x": u.get("x"),
+                                        "liquidite": u.get("liq"), "compte_x": u.get("x"), "profil_dex": u.get("profil"), "site": u.get("site"),
                                         "tx_h1": json.dumps(u.get("tx_h1")), "holders_40": pos["holders_40"],
                                         "historique": u.get("histo", "reconstitue"), **sig,
                                         **{"marche_" + k: v for k, v in pos["contexte"].items()}})

@@ -89,6 +89,7 @@ a{color:var(--acc);text-decoration:none}
     </label>
     <label class="chk"><span>Filtres</span>
       <span><input id="f-rug" type="checkbox" checked> écarter les tokens suspects (anti-rug)</span>
+      <span><input id="f-profil" type="checkbox"> seulement avec profil Dexscreener (test)</span>
       <span><input id="f-age" type="checkbox" checked> token de plus de 40 h (B et G)</span>
     </label>
   </div>
@@ -189,8 +190,8 @@ function simuler(trades, sortie, mise, cap, frais) {
 
 function suspect(p) { return !!(p.antirug && p.antirug.suspect); }
 function filtre(strat) {
-  const rug = $('f-rug').checked, age = $('f-age').checked;
-  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40));
+  const rug = $('f-rug').checked, age = $('f-age').checked, profil = $('f-profil').checked;
+  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40) && !(profil && p.profil === false));
 }
 
 function rendre() {
@@ -303,7 +304,7 @@ async function charger() {
     rendre();
   } catch (e) { $('maj').textContent = 'Données indisponibles pour le moment.'; }
 }
-for (const id of ['f-strat', 'f-sortie', 'f-mise', 'f-cap', 'f-rug', 'f-age']) $(id).addEventListener('change', () => DATA && rendre());
+for (const id of ['f-strat', 'f-sortie', 'f-mise', 'f-cap', 'f-rug', 'f-age', 'f-profil']) $(id).addEventListener('change', () => DATA && rendre());
 charger(); setInterval(charger, 60000);
 </script>
 </body>

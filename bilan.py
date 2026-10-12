@@ -104,6 +104,9 @@ def main():
         ("en hausse", lambda p: p.get("holders_40") and sig(p, "holders") and sig(p, "holders") > p["holders_40"]),
         ("stables ou en baisse", lambda p: p.get("holders_40") and sig(p, "holders") and sig(p, "holders") <= p["holders_40"]),
         ("inconnu", lambda p: not (p.get("holders_40") and sig(p, "holders")))])
+    L += tableau("Profil Dexscreener payé (règle testée depuis le 12/10)", T, [
+        ("avec profil", lambda p: p.get("profil") is True), ("sans profil", lambda p: p.get("profil") is False),
+        ("inconnu (avant le 12/10)", lambda p: p.get("profil") is None)])
     L += tableau("Compte X", T, [("oui", lambda p: p.get("x")), ("non", lambda p: not p.get("x"))])
     L += tableau("Marché (volume PumpSwap sur 7 jours)", T, [
         ("en hausse", lambda p: ((p.get("contexte") or {}).get("pumpswap_var7j") or 0) > 0),
