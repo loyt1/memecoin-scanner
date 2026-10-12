@@ -58,7 +58,7 @@ def main():
     sorties = list(fermees[0]["res"]) if fermees else [SORTIE_REF]
     jour = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     L = [f"# Bilan du bot memecoins ({jour})", "",
-         f"Trades B/G clôturés : {len(fermees)}. Ouverts : {len(ouvertes)}. Retirés (pool sans liquidité) : {len(invalides)}.",
+         f"Trades B/G/H clôturés : {len(fermees)}. Ouverts : {len(ouvertes)}. Retirés (pool sans liquidité ou achat en double) : {len(invalides)}.",
          "Moins de 30 trades par stratégie = tendance, pas preuve.", "",
          "## 1. Résultats contre le backtest", "",
          "| Stratégie | Sortie | Trades | Gagnants | Gain moyen | Médiane | Pire | Meilleur | Backtest | 5000 $ deviennent |",
