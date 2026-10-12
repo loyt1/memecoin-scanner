@@ -1,5 +1,5 @@
 {
-  "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ] && exit 0; git log -1 --pretty=%B | grep -q '\\[deploy\\]' && exit 1; [ \"$(git log -1 --pretty=%an)\" = \"scanner-bot\" ] && exit 0; git diff --quiet HEAD^ HEAD -- . ':(exclude)data' ':(exclude)RAPPORT.md' && exit 0 || exit 1",
+  "ignoreCommand": "bash vercel-ignore.sh",
   "headers": [
     {
       "source": "/data/(.*)",
