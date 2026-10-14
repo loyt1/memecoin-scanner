@@ -76,7 +76,7 @@ a{color:var(--acc);text-decoration:none}
 
   <div class="panel controls">
     <label>Stratégie
-      <select id="f-strat"><option value="BGH" selected>B + G + H</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option><option value="H">H (-80 %)</option></select>
+      <select id="f-strat"><option value="H" selected>H (-80 %)</option><option value="BGH">B + G + H (1 trade par token)</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option></select>
     </label>
     <label>Sortie
       <select id="f-sortie"></select>
@@ -191,7 +191,12 @@ function simuler(trades, sortie, mise, cap, frais) {
 function suspect(p) { return !!(p.antirug && p.antirug.suspect); }
 function filtre(strat) {
   const rug = $('f-rug').checked, age = $('f-age').checked, profil = $('f-profil').checked;
-  return DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40) && !(profil && p.profil === false));
+  const L = DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40) && !(profil && p.profil === false));
+  // Plusieurs stratégies ensemble : un seul trade par token (le premier), comme on le ferait en vrai.
+  // Sinon un même token comptait jusqu'à 3 fois (B, G et H) dans le portefeuille.
+  if (strat.length < 2) return L;
+  const vus = new Set();
+  return L.sort((a, b) => a.entree_t - b.entree_t).filter(p => !vus.has(p.token) && vus.add(p.token));
 }
 
 function rendre() {
