@@ -76,7 +76,7 @@ a{color:var(--acc);text-decoration:none}
 
   <div class="panel controls">
     <label>Stratégie
-      <select id="f-strat"><option value="H" selected>H (-80 %)</option><option value="BGH">B + G + H (1 trade par token)</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option></select>
+      <select id="f-strat"><option value="HS" selected>H sélective (test final, depuis le 15/10)</option><option value="H">H (-80 %, tout)</option><option value="BGH">B + G + H (1 trade par token)</option><option value="B">B (-60 %)</option><option value="G">G (-70 %)</option></select>
     </label>
     <label>Sortie
       <select id="f-sortie"></select>
@@ -191,6 +191,7 @@ function simuler(trades, sortie, mise, cap, frais) {
 function suspect(p) { return !!(p.antirug && p.antirug.suspect); }
 function filtre(strat) {
   const rug = $('f-rug').checked, age = $('f-age').checked, profil = $('f-profil').checked;
+  if (strat === 'HS') return DATA.trades.filter(p => p.version === 'H-selectif');
   const L = DATA.trades.filter(p => strat.includes(p.strat) && !(rug && suspect(p)) && !(age && ['B', 'G'].includes(p.strat) && p.age_h != null && p.age_h < 40) && !(profil && p.profil === false));
   // Plusieurs stratégies ensemble : un seul trade par token (le premier), comme on le ferait en vrai.
   // Sinon un même token comptait jusqu'à 3 fois (B, G et H) dans le portefeuille.
@@ -260,7 +261,7 @@ function rendre() {
   }).join('') : '<tr><td class="empty">Aucune position ouverte.</td></tr>';
 
   // tous les trades
-  const tous = DATA.trades.filter(p => strat.includes(p.strat)).sort((a, b) => b.entree_t - a.entree_t);
+  const tous = (strat === 'HS' ? filtre('HS') : DATA.trades.filter(p => strat.includes(p.strat))).sort((a, b) => b.entree_t - a.entree_t);
   $('t-all').innerHTML = tous.length ? '<tr><th>Token</th><th>Strat</th><th>Entrée</th><th>Sommet</th><th>MC entrée</th><th>Pump</th><th>Résultat</th><th>Plus haut</th><th>Plus bas</th><th>Baleines A/V</th><th>KOLs A/V</th><th>Holders</th><th>Anti-rug</th><th>Statut</th></tr>' + tous.map(p => {
     const r = p.res[sortie], sig = p.sig || {};
     return `<tr><td><a href="https://dexscreener.com/solana/${p.pair}" target="_blank">${esc(p.sym)}</a></td><td><span class="tag ${p.strat}">${p.strat}</span></td><td class="n">${fmtT(p.entree_t)}</td><td class="n">${mc(p.peak)}</td><td class="n">${mc(p.prix_entree)}</td>

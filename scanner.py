@@ -38,6 +38,11 @@ STRATEGIES = {
     # (+12 % par token sur 24 tokens pump.fun, intervalle -6 % / +30 % : pas une preuve, d'où le test en direct)
     "H": {"dd": 0.80, "pump_max": 30, "h_min": 1},
 }
+# Bilan du 2026-10-15 : B (-35 % par token), G (-44 %) et H (-29 %) perdants en direct. B et G arrêtés (plus de
+# nouvelles entrées, les positions ouvertes sont suivies jusqu'au bout). Dernier test, décidé avec Nils : H « sélective ».
+# Règle fixée d'avance : à 30 tokens, moyenne positive → on parle d'argent réel, sinon on arrête sans rediscuter.
+STRATEGIES_ACTIVES = {"H"}
+H_SELECTIF = {"pump_max": 20, "mc_min": 200_000, "mc_max": 600_000, "liq_min": 30_000}
 # Variantes de sortie suivies en parallèle pour chaque position
 SORTIES = {
     "50_x2_sl60": {"sl": 0.60, "tps": [(0.5, 0.5), (1.0, 0.5)]},
@@ -457,7 +462,7 @@ def radar(univ, maintenant):
 def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
     """Fichier léger lu par le site (tableau de bord Vercel)."""
     champs = ("token", "pair", "sym", "strat", "entree_t", "prix_entree", "ordre_limite", "mc_reel", "peak", "peak_t",
-              "pump_x", "pump_h", "h_vers_entree", "liq", "x", "profil", "site", "age_h", "holders_40", "sig", "res", "haut", "bas",
+              "pump_x", "pump_h", "h_vers_entree", "liq", "x", "profil", "site", "version", "age_h", "holders_40", "sig", "res", "haut", "bas",
               "nouveau_sommet", "mc_actuel", "retard_min", "antirug")
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions if p["strat"] != "C" or STRATEGIE_C_ACTIVE]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
@@ -511,6 +516,8 @@ def main():
         if e["dd"] >= 0.4 and u.get("h40_peak") != e["peak_t"]:
             u["h40_peak"], u["holders_40"] = e["peak_t"], holders(t)
         for strat, s in STRATEGIES.items():
+            if strat not in STRATEGIES_ACTIVES:
+                continue
             if e["pump_x"] > s["pump_max"] or e["dd"] < s["dd"] or (t, strat, e["peak_t"]) in deja:
                 continue
             # une seule position à la fois, et pas de nouvelle entrée sans un nouveau sommet plus haut (dans les 7 jours)
@@ -544,8 +551,22 @@ def main():
                 prix = min(limite, e["mc"])
             else:
                 continue
+            if strat == "H":
+                f = H_SELECTIF
+                if e["pump_x"] > f["pump_max"] or not (f["mc_min"] <= prix < f["mc_max"]) or (u.get("liq") or 0) < f["liq_min"]:
+                    continue
+                c = u.get("ar_cache")
+                if c and maintenant - c["t"] < 86400:
+                    ar = c["res"]          # un token jugé suspect n'est pas ré-analysé à chaque relevé
+                else:
+                    ar = analyse_antirug(t)
+                    if ar and not ar.get("erreur"):
+                        u["ar_cache"] = {"t": maintenant, "res": ar}
+                if not ar or ar.get("erreur") or ar.get("suspect"):
+                    continue     # anti-rug suspect, ou pas encore analysé (limite de 4 analyses par relevé) : réessai au relevé suivant
+            else:
+                ar = analyse_antirug(t)
             sig = signaux(u, t, e["peak_t"], kol_map)
-            ar = analyse_antirug(t)
             sig.update(kol_resume(flux, t, e["peak_t"], kol_map) if flux else
                        {"kols_acheteurs": None, "kols_vendeurs": None, "kols_achat_usd": None, "kols_vente_usd": None, "kols_noms": ""})
             pos = {"token": t, "pair": u["pair"], "sym": u["sym"], "strat": strat, "entree_t": maintenant,
@@ -553,6 +574,7 @@ def main():
                    "pump_x": round(e["pump_x"], 2), "pump_h": round((e["peak_t"] - e["pre_t"]) / 3600, 1),
                    "h_vers_entree": round(h, 1), "liq": u.get("liq"), "x": u.get("x"),
                    "profil": u.get("profil"), "site": u.get("site"),
+                   "version": "H-selectif" if strat == "H" else None,
                    "age_h": round((maintenant - u["cree"]) / 3600) if u.get("cree") else None,
                    "holders_40": u.get("holders_40") if u.get("h40_peak") == e["peak_t"] else None,
                    "sig": sig, "antirug": ar, "contexte": {k: v for k, v in ctx.items() if k != "t"},

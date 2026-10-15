@@ -69,6 +69,15 @@ def main():
             g = [p["res"][so]["pnl"] for p in t]
             bt = f"+{round(100 * BACKTEST[st])} %" if so == SORTIE_REF else ""   # H : backtest sans biais du 11/10
             L.append(f"| {st} | {so} " + stats(g) + f" {bt} | {capital(t, so)} $ |")
+    HS = [p for p in fermees + ouvertes if p.get("version") == "H-selectif"]
+    hs_tok = {}
+    for p in HS:
+        hs_tok.setdefault(p["token"], []).append(p["res"][SORTIE_REF]["pnl"])
+    moy = [sum(v) / len(v) for v in hs_tok.values()]
+    L += ["", "## Test final : H sélective (depuis le 2026-10-15)", "",
+          f"Tokens : {len(hs_tok)} / 30. Moyenne par token (clôturés + ouverts au prix actuel) : "
+          + (f"{round(100 * sum(moy) / len(moy))} %, {sum(m > 0 for m in moy)} gagnants." if moy else "pas encore de trade."),
+          "Règle fixée d'avance : à 30 tokens, moyenne positive → on parle d'argent réel ; sinon, arrêt."]
     L += ["", "## 2. Quel filtre aurait aidé ? (B et G ensemble, sortie 50 % / x2, stop -60 %)", ""]
     T = fermees
     ar = lambda p: (p.get("antirug") or {})
