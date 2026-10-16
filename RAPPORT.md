@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-16 22:12 UTC)
+# Rapport du scanner (mis à jour le 2026-10-16 22:27 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 7754 (dont 4577 relevés à ce passage). Requêtes : 264 Dexscreener, 18 GeckoTerminal (0 échecs).
+Tokens suivis : 7749 (dont 4575 relevés à ce passage). Requêtes : 263 Dexscreener, 1 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -27,7 +27,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -29 % | +-1 % | -30 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
+| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -28 % | +-1 % | -30 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
 | [NST](https://dexscreener.com/solana/caWWda11Ye4Xme9D5GKo67Hb8g5mJv1SzKAwrLRnggQ) | H | 2026-10-14 22:55 | 1.64 M$ | x7.6 | -1 % | +6 % | -2 % | 0/0 $ | 0/0 | 2685 → 2685 | ouverte |
 | [KACY](https://dexscreener.com/solana/5vftbCTL9epeny7tUfLNddVTMg7rdwU3wuHz249dQZeH) | H | 2026-10-14 02:39 | 0.27 M$ | x28.4 | -63 % | +-6 % | -60 % | 20237/22493 $ | 0/0 | 1491 → 1491 | clôturée |
 | [SECRETFROG](https://dexscreener.com/solana/7dWwLrscRgkuhTEBnZm6rLvekvS2uft3Sz8EBj4XLUMy) | G | 2026-10-14 02:39 | 0.29 M$ | x9.7 | -68 % | +0 % | -65 % | 27012/46589 $ | 0/0 | 2179 → 2179 | clôturée |
@@ -104,9 +104,9 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [SMACK](https://dexscreener.com/solana/7MfeyFJ7gXMfL8D4tnS2ehbUGDewrjXmr3bq9UKQXEac) | C | 2026-10-09 22:38 | 0.0 M$ | - | -40 % | +-13 % | -37 % | None/None $ | 4/None | None → None | ouverte |
 | [AURA](https://dexscreener.com/solana/8o84NNFBDq14WuVTU1CHTHy4prVC19qbqikbrSLaz6Hg) | C | 2026-10-09 22:23 | 0.1 M$ | - | -63 % | +-87 % | -87 % | None/None $ | 3/None | None → None | clôturée |
 | [PETAH](https://dexscreener.com/solana/6kCiSBtNTDJQzxnnxo2mV6jqAdYj2b6DaJYvStXTjhZg) | C | 2026-10-09 22:23 | 0.03 M$ | - | 72 % | +119 % | 1 % | None/None $ | 3/None | None → None | clôturée |
-| [OpenWhip](https://dexscreener.com/solana/51Uwkxr81vsJHHQc4DHiDGf2FHiPEiMgjW78SS9tdHWi) | C | 2026-10-09 22:23 | 0.0 M$ | - | -16 % | +6 % | -13 % | None/None $ | 4/None | None → None | ouverte |
-| [Sakura](https://dexscreener.com/solana/EL8yzjkpfesrL6jMqgBCW2WYBYGGTKD8E5ECivM9e95u) | C | 2026-10-09 22:23 | 0.0 M$ | - | -13 % | +6 % | -10 % | None/None $ | 3/None | None → None | ouverte |
-| [GERALD](https://dexscreener.com/solana/8KNd48PUc3M26PyVDAP8rpX1595og5nzHeARSCQvNe4G) | C | 2026-10-09 22:23 | 0.01 M$ | - | -43 % | +-39 % | -40 % | None/None $ | 3/None | None → None | ouverte |
+| [OpenWhip](https://dexscreener.com/solana/51Uwkxr81vsJHHQc4DHiDGf2FHiPEiMgjW78SS9tdHWi) | C | 2026-10-09 22:23 | 0.0 M$ | - | -16 % | +6 % | -13 % | None/None $ | 4/None | None → None | clôturée |
+| [Sakura](https://dexscreener.com/solana/EL8yzjkpfesrL6jMqgBCW2WYBYGGTKD8E5ECivM9e95u) | C | 2026-10-09 22:23 | 0.0 M$ | - | -13 % | +6 % | -10 % | None/None $ | 3/None | None → None | clôturée |
+| [GERALD](https://dexscreener.com/solana/8KNd48PUc3M26PyVDAP8rpX1595og5nzHeARSCQvNe4G) | C | 2026-10-09 22:23 | 0.01 M$ | - | -43 % | +-39 % | -40 % | None/None $ | 3/None | None → None | clôturée |
 | [MOBILE](https://dexscreener.com/solana/4kdZmm28zgxe8edqBeLhnfmhoSLzR3j9orEHR5zBTRbn) | C | 2026-10-09 22:08 | 0.03 M$ | - | -63 % | +-63 % | -63 % | None/None $ | 3/None | None → None | clôturée |
 | [lolcat](https://dexscreener.com/solana/42AVcsmCUmDQhj8JPd6QE37wBG1HUMw5bTzBgt9DiDcv) | C | 2026-10-09 22:08 | 0.03 M$ | - | 72 % | +124 % | 19 % | None/None $ | 4/None | None → None | clôturée |
 | [Flaccid](https://dexscreener.com/solana/GSf6yoi8DJWMpGhvJakRLwyzSND7egurfTbRNXd81DrN) | C | 2026-10-09 22:08 | 0.03 M$ | - | -63 % | +33 % | -72 % | None/None $ | 4/None | None → None | clôturée |
