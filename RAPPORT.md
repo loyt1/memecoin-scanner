@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-16 21:57 UTC)
+# Rapport du scanner (mis à jour le 2026-10-16 22:12 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 7763 (dont 4572 relevés à ce passage). Requêtes : 264 Dexscreener, 3 GeckoTerminal (0 échecs).
+Tokens suivis : 7754 (dont 4577 relevés à ce passage). Requêtes : 264 Dexscreener, 18 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -27,7 +27,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -27 % | +-1 % | -30 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
+| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -29 % | +-1 % | -30 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
 | [NST](https://dexscreener.com/solana/caWWda11Ye4Xme9D5GKo67Hb8g5mJv1SzKAwrLRnggQ) | H | 2026-10-14 22:55 | 1.64 M$ | x7.6 | -1 % | +6 % | -2 % | 0/0 $ | 0/0 | 2685 → 2685 | ouverte |
 | [KACY](https://dexscreener.com/solana/5vftbCTL9epeny7tUfLNddVTMg7rdwU3wuHz249dQZeH) | H | 2026-10-14 02:39 | 0.27 M$ | x28.4 | -63 % | +-6 % | -60 % | 20237/22493 $ | 0/0 | 1491 → 1491 | clôturée |
 | [SECRETFROG](https://dexscreener.com/solana/7dWwLrscRgkuhTEBnZm6rLvekvS2uft3Sz8EBj4XLUMy) | G | 2026-10-14 02:39 | 0.29 M$ | x9.7 | -68 % | +0 % | -65 % | 27012/46589 $ | 0/0 | 2179 → 2179 | clôturée |
@@ -112,11 +112,11 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [Flaccid](https://dexscreener.com/solana/GSf6yoi8DJWMpGhvJakRLwyzSND7egurfTbRNXd81DrN) | C | 2026-10-09 22:08 | 0.03 M$ | - | -63 % | +33 % | -72 % | None/None $ | 4/None | None → None | clôturée |
 | [API](https://dexscreener.com/solana/4AYdMCxwpeu6L5HCy8xa6maquchFLMWY6XtuXqYfhB6z) | C | 2026-10-09 22:08 | 0.08 M$ | - | 72 % | +111 % | -20 % | None/None $ | 3/None | None → None | clôturée |
 | [VOID](https://dexscreener.com/solana/GwxBUdvmbqWBHWgCf2hXp8e8qvwj9Hx7Nbp46aRSbVBf) | C | 2026-10-09 22:08 | 0.01 M$ | - | -63 % | +18 % | -60 % | None/None $ | 3/None | None → None | clôturée |
-| [Pairly](https://dexscreener.com/solana/EfTDhHVwz9sWRBeA2jidSTVygyMPyUev4bdhzt5BHMyM) | C | 2026-10-09 22:08 | 0.0 M$ | - | -28 % | +-5 % | -25 % | None/None $ | 3/None | None → None | ouverte |
-| [Aioli](https://dexscreener.com/solana/BYNvssF4HGFonnpFnXgei3Hd9XUFBvwAH1ZUapz9VtZV) | C | 2026-10-09 22:08 | 0.0 M$ | - | -52 % | +-49 % | -49 % | None/None $ | 4/None | None → None | ouverte |
-| [Aioli](https://dexscreener.com/solana/7qTUPdyLKGLuF6RntuUYxyPEJSs539ewwUZcRxtyLW7B) | C | 2026-10-09 22:08 | 0.0 M$ | - | -30 % | +-27 % | -27 % | None/None $ | 5/None | None → None | ouverte |
-| [ED](https://dexscreener.com/solana/5gtoXLESuF1UmgkUUtwFhbfUo9v6VzZ5yHZXcMkigsms) | C | 2026-10-09 22:08 | 0.0 M$ | - | -16 % | +12 % | -13 % | None/None $ | 3/None | None → None | ouverte |
-| [BEANOS](https://dexscreener.com/solana/ETZb8tsnGoa4BYf9QqNFfhgAgy6xYsPvtXWQpFrFKG3e) | C | 2026-10-09 22:08 | 0.0 M$ | - | -33 % | +-30 % | -31 % | None/None $ | 3/None | None → None | ouverte |
+| [Pairly](https://dexscreener.com/solana/EfTDhHVwz9sWRBeA2jidSTVygyMPyUev4bdhzt5BHMyM) | C | 2026-10-09 22:08 | 0.0 M$ | - | -28 % | +-5 % | -25 % | None/None $ | 3/None | None → None | clôturée |
+| [Aioli](https://dexscreener.com/solana/BYNvssF4HGFonnpFnXgei3Hd9XUFBvwAH1ZUapz9VtZV) | C | 2026-10-09 22:08 | 0.0 M$ | - | -52 % | +-49 % | -49 % | None/None $ | 4/None | None → None | clôturée |
+| [Aioli](https://dexscreener.com/solana/7qTUPdyLKGLuF6RntuUYxyPEJSs539ewwUZcRxtyLW7B) | C | 2026-10-09 22:08 | 0.0 M$ | - | -30 % | +-27 % | -27 % | None/None $ | 5/None | None → None | clôturée |
+| [ED](https://dexscreener.com/solana/5gtoXLESuF1UmgkUUtwFhbfUo9v6VzZ5yHZXcMkigsms) | C | 2026-10-09 22:08 | 0.0 M$ | - | -16 % | +12 % | -13 % | None/None $ | 3/None | None → None | clôturée |
+| [BEANOS](https://dexscreener.com/solana/ETZb8tsnGoa4BYf9QqNFfhgAgy6xYsPvtXWQpFrFKG3e) | C | 2026-10-09 22:08 | 0.0 M$ | - | -33 % | +-30 % | -31 % | None/None $ | 3/None | None → None | clôturée |
 | [Pitch](https://dexscreener.com/solana/5RAvEq8eiB82MdEs4v3gSd3efoixzskBmNjQWbj9LxVc) | C | 2026-10-09 21:53 | 0.03 M$ | - | -63 % | +-88 % | -88 % | None/None $ | 3/None | None → None | clôturée |
 | [STABLE](https://dexscreener.com/solana/AfKEYFEm1wSD58EwmxVhJmKYsdkdka8NzEME3W87jrxk) | C | 2026-10-09 21:53 | 0.03 M$ | - | -8 % | +50 % | -61 % | None/None $ | 3/None | None → None | clôturée |
 | [Ape](https://dexscreener.com/solana/6hC2anGQcqsm7jjfCwmoCXFagteTziQSa8gbf677Qsh4) | C | 2026-10-09 21:53 | 0.0 M$ | - | -56 % | +-52 % | -53 % | None/None $ | 4/None | None → None | clôturée |
