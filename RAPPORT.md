@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-16 07:56 UTC)
+# Rapport du scanner (mis à jour le 2026-10-16 08:11 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 8297 (dont 4752 relevés à ce passage). Requêtes : 281 Dexscreener, 3 GeckoTerminal (0 échecs).
+Tokens suivis : 8296 (dont 4753 relevés à ce passage). Requêtes : 281 Dexscreener, 19 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -33,7 +33,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [SECRETFROG](https://dexscreener.com/solana/7dWwLrscRgkuhTEBnZm6rLvekvS2uft3Sz8EBj4XLUMy) | H | 2026-10-13 20:24 | 0.27 M$ | x12.0 | -9 % | +62 % | -62 % | 4964/9190 $ | 0/0 | 510 → 510 | clôturée |
 | [CYBERLEEK](https://dexscreener.com/solana/G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh) | B | 2026-10-13 18:39 | 2.2 M$ | x4.9 | -17 % | +34 % | -51 % | 108299/161776 $ | 0/0 | 53608 → 53608 | ouverte |
 | [SWOLF](https://dexscreener.com/solana/6brAAmd965v3amhS6nFX2Fr6ytQC2dPY7M8XkxYRrsNn) | B | 2026-10-13 13:24 | 0.81 M$ | x4.7 | -63 % | +-4 % | -60 % | 25645/10300 $ | 0/0 | 2570 → 2570 | clôturée |
-| [QI](https://dexscreener.com/solana/cb4GFRgEitfu5qtxfRMiqzsaVPwgbD3HEor4cs2jFpn) | B | 2026-10-13 09:39 | 0.92 M$ | x3.1 | -34 % | +24 % | -55 % | 20753/23337 $ | 0/0 | 10153 → 10153 | ouverte |
+| [QI](https://dexscreener.com/solana/cb4GFRgEitfu5qtxfRMiqzsaVPwgbD3HEor4cs2jFpn) | B | 2026-10-13 09:39 | 0.92 M$ | x3.1 | -35 % | +24 % | -55 % | 20753/23337 $ | 0/0 | 10153 → 10153 | ouverte |
 | [RARI](https://dexscreener.com/solana/ioaDGkQUh6h5nNTmcv8k3NvAgSTiS3xMFNaN3j11KzV) | B | 2026-10-13 01:23 | 0.66 M$ | x2.1 | -33 % | +20 % | -42 % | 10292/41888 $ | 0/0 | 3762 → 3762 | ouverte |
 | [SLOPCORE](https://dexscreener.com/solana/3UMUTZeeVSLywQjeZ6sjngu3jc6oQSxpy2ApNH3xL8sf) | G | 2026-10-12 21:53 | 0.33 M$ | x4.5 | -24 % | +29 % | -49 % | 2866/5140 $ | 0/0 | 1678 → 1678 | ouverte |
 | [HIGGS](https://dexscreener.com/solana/BFrSZakeqNzVtM3EFhroo4eRhagmmWN8BRntiQKFH6Ru) | B | 2026-10-12 19:23 | 0.55 M$ | x2.3 | -1 % | +54 % | -55 % | 20767/43886 $ | 0/0 | 10275 → 10275 | clôturée |
