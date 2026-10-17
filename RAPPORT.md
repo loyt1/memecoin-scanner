@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-17 00:12 UTC)
+# Rapport du scanner (mis à jour le 2026-10-17 00:27 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 7704 (dont 4578 relevés à ce passage). Requêtes : 262 Dexscreener, 16 GeckoTerminal (0 échecs).
+Tokens suivis : 7702 (dont 4578 relevés à ce passage). Requêtes : 262 Dexscreener, 5 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -16,10 +16,10 @@ Tokens suivis : 7704 (dont 4578 relevés à ce passage). Requêtes : 262 Dexscre
 | G | 30_60_sl60 | 9 | 22 % | -35.4 % | 0 |
 | G | 50_x2_sl30 | 9 | 22 % | -18.8 % | 0 |
 | G | moonbag | 9 | 22 % | -37.4 % | 0 |
-| H | 50_x2_sl60 | 11 | 27 % | -21.5 % | 5 |
-| H | 30_60_sl60 | 11 | 36 % | -21.7 % | 5 |
-| H | 50_x2_sl30 | 11 | 18 % | -27.5 % | 5 |
-| H | moonbag | 11 | 27 % | -21.8 % | 5 |
+| H | 50_x2_sl60 | 11 | 27 % | -21.5 % | 6 |
+| H | 30_60_sl60 | 11 | 36 % | -21.7 % | 6 |
+| H | 50_x2_sl30 | 11 | 18 % | -27.5 % | 6 |
+| H | moonbag | 11 | 27 % | -21.8 % | 6 |
 
 Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trade.
 
@@ -27,7 +27,8 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -34 % | +-1 % | -31 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
+| [SLOPCORE](https://dexscreener.com/solana/3UMUTZeeVSLywQjeZ6sjngu3jc6oQSxpy2ApNH3xL8sf) | H | 2026-10-17 00:27 | 0.21 M$ | x6.3 | -3 % | +0 % | 0 % | 0/0 $ | 0/0 | 1873 → 1873 | ouverte |
+| [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -35 % | +-1 % | -32 % | 10709/14826 $ | 0/0 | 5723 → 5723 | ouverte |
 | [NST](https://dexscreener.com/solana/caWWda11Ye4Xme9D5GKo67Hb8g5mJv1SzKAwrLRnggQ) | H | 2026-10-14 22:55 | 1.64 M$ | x7.6 | -2 % | +6 % | -2 % | 0/0 $ | 0/0 | 2685 → 2685 | ouverte |
 | [KACY](https://dexscreener.com/solana/5vftbCTL9epeny7tUfLNddVTMg7rdwU3wuHz249dQZeH) | H | 2026-10-14 02:39 | 0.27 M$ | x28.4 | -63 % | +-6 % | -60 % | 20237/22493 $ | 0/0 | 1491 → 1491 | clôturée |
 | [SECRETFROG](https://dexscreener.com/solana/7dWwLrscRgkuhTEBnZm6rLvekvS2uft3Sz8EBj4XLUMy) | G | 2026-10-14 02:39 | 0.29 M$ | x9.7 | -68 % | +0 % | -65 % | 27012/46589 $ | 0/0 | 2179 → 2179 | clôturée |
@@ -126,4 +127,3 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [QuantumMod](https://dexscreener.com/solana/CHrQkihp9WbJc4z5K4LVipQ6RSKJgtw4TjJx3CivTqSC) | C | 2026-10-09 21:38 | 0.01 M$ | - | -52 % | +-47 % | -49 % | None/None $ | 4/None | None → None | clôturée |
 | [bob](https://dexscreener.com/solana/9csfFDDeqhKSGVQ486dNYW8a1SfgDWJ7Wd3J7qnGm4Wf) | C | 2026-10-09 21:38 | 0.0 M$ | - | -19 % | +-16 % | -16 % | None/None $ | 3/None | None → None | clôturée |
 | [QFART](https://dexscreener.com/solana/6RQjd8XdDFjstfapD8XcFjB8HbAXQiAj7ARG7cLrSA3P) | C | 2026-10-09 21:38 | 0.0 M$ | - | -15 % | +-12 % | -12 % | None/None $ | 3/None | None → None | clôturée |
-| [Tubby](https://dexscreener.com/solana/9PGuyn6Tkw3DiA3n1py9cnUpD68my9zzUgCcny2aSHHL) | C | 2026-10-09 21:38 | 0.0 M$ | - | -23 % | +-20 % | -20 % | None/None $ | 5/None | None → None | clôturée |
