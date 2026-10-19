@@ -1,17 +1,17 @@
-# Rapport du scanner (mis à jour le 2026-10-19 14:29 UTC)
+# Rapport du scanner (mis à jour le 2026-10-19 14:44 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 6947 (dont 4301 relevés à ce passage). Requêtes : 237 Dexscreener, 3 GeckoTerminal (0 échecs).
+Tokens suivis : 6933 (dont 4292 relevés à ce passage). Requêtes : 236 Dexscreener, 4 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
 | Stratégie | Sortie | Trades clôturés | Gagnants | Gain moyen | En cours |
 |---|---|---|---|---|---|
-| B | 50_x2_sl60 | 8 | 12 % | -36.7 % | 2 |
-| B | 30_60_sl60 | 8 | 12 % | -39.2 % | 2 |
-| B | 50_x2_sl30 | 8 | 25 % | -24.6 % | 2 |
-| B | moonbag | 8 | 0 % | -50.7 % | 2 |
+| B | 50_x2_sl60 | 9 | 11 % | -35.8 % | 1 |
+| B | 30_60_sl60 | 9 | 11 % | -38.0 % | 1 |
+| B | 50_x2_sl30 | 9 | 22 % | -25.6 % | 1 |
+| B | moonbag | 9 | 0 % | -49.7 % | 1 |
 | G | 50_x2_sl60 | 9 | 11 % | -42.7 % | 0 |
 | G | 30_60_sl60 | 9 | 22 % | -35.4 % | 0 |
 | G | 50_x2_sl30 | 9 | 22 % | -18.8 % | 0 |
@@ -28,7 +28,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | [Pepper](https://dexscreener.com/solana/GKVfZiv4EUNViMRfUejEn5QJN29oXGCyk7FY2iUv3bGi) | H | 2026-10-19 09:14 | 0.35 M$ | x11.3 | 72 % | +889 % | 12 % | 0/0 $ | 0/0 | 2444 → 2444 | clôturée |
-| [SAINDRA](https://dexscreener.com/solana/9hjKmterUjufRaYUrSTEHEYJZg83LQ52behux54LSeF6) | H | 2026-10-19 08:44 | 0.22 M$ | x5.4 | -13 % | +17 % | -14 % | 0/4599 $ | 0/0 | 2121 → 2121 | ouverte |
+| [SAINDRA](https://dexscreener.com/solana/9hjKmterUjufRaYUrSTEHEYJZg83LQ52behux54LSeF6) | H | 2026-10-19 08:44 | 0.22 M$ | x5.4 | -12 % | +17 % | -14 % | 0/4599 $ | 0/0 | 2121 → 2121 | ouverte |
 | [SLOPCORE](https://dexscreener.com/solana/3UMUTZeeVSLywQjeZ6sjngu3jc6oQSxpy2ApNH3xL8sf) | H | 2026-10-17 00:27 | 0.21 M$ | x6.3 | 72 % | +159 % | 9 % | 0/0 $ | 0/0 | 1873 → 1873 | clôturée |
 | [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-16 11:57 | 0.38 M$ | x19.7 | -64 % | +-1 % | -60 % | 10709/14826 $ | 0/0 | 5723 → 5723 | clôturée |
 | [NST](https://dexscreener.com/solana/caWWda11Ye4Xme9D5GKo67Hb8g5mJv1SzKAwrLRnggQ) | H | 2026-10-14 22:55 | 1.64 M$ | x7.6 | -5 % | +6 % | -2 % | 0/0 $ | 0/0 | 2685 → 2685 | ouverte |
@@ -45,7 +45,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 | [Altai](https://dexscreener.com/solana/DMEUT8UV5JX8G7jB7TP9XyfBUrP5z7p6VPLSE2WbbRHt) | H | 2026-10-12 18:08 | 0.15 M$ | x29.7 | 72 % | +949 % | -38 % | 9074/19811 $ | 0/0 | 5855 → 5855 | clôturée |
 | [SWOLF](https://dexscreener.com/solana/6brAAmd965v3amhS6nFX2Fr6ytQC2dPY7M8XkxYRrsNn) | G | 2026-10-12 16:38 | 0.79 M$ | x5.2 | -63 % | +47 % | -60 % | 55569/34620 $ | 0/0 | 2570 → 2570 | clôturée |
 | [SLOPCORE](https://dexscreener.com/solana/3UMUTZeeVSLywQjeZ6sjngu3jc6oQSxpy2ApNH3xL8sf) | B | 2026-10-12 16:23 | 0.44 M$ | x4.5 | -65 % | +-3 % | -62 % | 10484/12766 $ | 0/0 | 1678 → 1678 | clôturée |
-| [DRMR](https://dexscreener.com/solana/4wbt5gf46kCt9dhzNFVtAEn5PnFr56U5HTpw27TVytvV) | B | 2026-10-12 14:38 | 0.77 M$ | x2.9 | -29 % | +-26 % | -26 % | 14869/39257 $ | 0/0 | 1967 → 1967 | ouverte |
+| [DRMR](https://dexscreener.com/solana/4wbt5gf46kCt9dhzNFVtAEn5PnFr56U5HTpw27TVytvV) | B | 2026-10-12 14:38 | 0.77 M$ | x2.9 | -29 % | +-26 % | -26 % | 14869/39257 $ | 0/0 | 1967 → 1967 | clôturée |
 | [CYBERLEEK](https://dexscreener.com/solana/G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh) | H | 2026-10-12 11:08 | 2.31 M$ | x8.2 | -39 % | +-36 % | -36 % | 612825/849384 $ | 0/0 | 53608 → 53608 | clôturée |
 | [SI](https://dexscreener.com/solana/GnpvosiacUQbkxPPTFo2C79CX2qTuKgXAwHekyLJoDbe) | H | 2026-10-12 10:38 | 0.26 M$ | x3.0 | -47 % | +-44 % | -44 % | 0/5709 $ | 0/0 | 2694 → 2694 | clôturée |
 | [CRAWL](https://dexscreener.com/solana/2B8tftZ5ww8TREMr3pgkgERLNjJyJxEAPWMENViGMsL4) | B | 2026-10-12 09:14 | 2.47 M$ | x2.2 | -47 % | +-44 % | -44 % | 25110/77435 $ | 0/0 | 10523 → 10523 | clôturée |
