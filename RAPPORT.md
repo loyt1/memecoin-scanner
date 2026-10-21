@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-21 03:00 UTC)
+# Rapport du scanner (mis à jour le 2026-10-21 03:15 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 7241 (dont 4696 relevés à ce passage). Requêtes : 246 Dexscreener, 15 GeckoTerminal (0 échecs).
+Tokens suivis : 7249 (dont 4700 relevés à ce passage). Requêtes : 246 Dexscreener, 3 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -27,7 +27,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [ELON](https://dexscreener.com/solana/CnHqem7jPbjA5p2xHBGPHQG7E9NkZWcQr9q6R9YWb7zf) | H | 2026-10-21 02:15 | 0.52 M$ | x13.1 | 63 % | +94 % | 42 % | 41213/104128 $ | 1/0 | 4964 → 4891 | ouverte |
+| [ELON](https://dexscreener.com/solana/CnHqem7jPbjA5p2xHBGPHQG7E9NkZWcQr9q6R9YWb7zf) | H | 2026-10-21 02:15 | 0.52 M$ | x13.1 | 60 % | +94 % | 42 % | 41213/104128 $ | 1/0 | 4964 → 4891 | ouverte |
 | [YOKAI](https://dexscreener.com/solana/3oxwfRK3GdRK8sEkSrMTKdSJGJ5FRX1nkQycqicYuj76) | H | 2026-10-21 00:00 | 0.26 M$ | x2.9 | 4 % | +20 % | -3 % | 4876/30541 $ | 0/2 | None → 390 | ouverte |
 | [Pepper](https://dexscreener.com/solana/GKVfZiv4EUNViMRfUejEn5QJN29oXGCyk7FY2iUv3bGi) | H | 2026-10-19 09:14 | 0.35 M$ | x11.3 | 72 % | +889 % | 12 % | 0/0 $ | 0/0 | 2444 → 2444 | clôturée |
 | [SAINDRA](https://dexscreener.com/solana/9hjKmterUjufRaYUrSTEHEYJZg83LQ52behux54LSeF6) | H | 2026-10-19 08:44 | 0.22 M$ | x5.4 | -19 % | +17 % | -42 % | 0/4599 $ | 0/0 | 2121 → 2121 | ouverte |
