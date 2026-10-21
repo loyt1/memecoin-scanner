@@ -292,7 +292,12 @@ function verdict(p) {
 
 function ev(t, couleur, txt, why) { return `<div class="ev"><div class="t">${fmtT(t)}</div><div class="dot" style="background:${couleur}"></div><div class="d">${txt}${why ? `<div class="why">${why}</div>` : ''}</div></div>`; }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c])); }
-function nomSortie(k) { const v = DATA.sorties[k]; let n = v.tps.map(t => '+' + Math.round(t[0] * 100) + ' %').join(' / ') + ', stop -' + Math.round(v.sl * 100) + ' %'; if (v.suiveur) n = '40 % à +50 % / 40 % à +100 %, 20 % gardés (stop suiveur -' + Math.round(v.suiveur * 100) + ' %, 7 j)'; return n; }
+function nomSortie(k) {
+  const v = DATA.sorties[k], pc = x => Math.round(x * 100) + ' %';
+  if (v.suiveur && v.suiveur_des == null) return '40 % à +50 % / 40 % à +100 %, 20 % gardés (stop suiveur -' + pc(v.suiveur) + ', 7 j)';
+  if (v.suiveur) return 'moitié à +' + pc(v.tps[0][0]) + ', le reste suit le prix (stop suiveur -' + pc(v.suiveur) + '), stop -' + pc(v.sl);
+  return v.tps.map(t => '+' + pc(t[0])).join(' / ') + ', stop -' + pc(v.sl) + (v.be ? ', remonté au prix d\'achat après +' + pc(v.tps[0][0]) : '');
+}
 
 async function charger() {
   try {

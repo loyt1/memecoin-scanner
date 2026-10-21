@@ -50,6 +50,11 @@ SORTIES = {
     "50_x2_sl30": {"sl": 0.30, "tps": [(0.5, 0.5), (1.0, 0.5)]},
     # « moonbag » : 40 % à +50 %, 40 % à x2, on garde 20 % avec un stop suiveur à -40 % du plus haut, jusqu'à 7 jours
     "moonbag": {"sl": 0.60, "tps": [(0.5, 0.4), (1.0, 0.4)], "suiveur": 0.40, "max_h": 168},
+    # Ajoutées le 2026-10-21 (backtest sans biais, 17 tokens « H sélective ») : stop -60 % = +19 %, stop -40 % = +21 %
+    # avec 13 gagnants sur 17 au lieu de 9 ; stop -30 % ou moins = trop serré (+7 %, +1 %)
+    "50_x2_sl40": {"sl": 0.40, "tps": [(0.5, 0.5), (1.0, 0.5)]},
+    "50_x2_sl40_be": {"sl": 0.40, "tps": [(0.5, 0.5), (1.0, 0.5)], "be": True},
+    "50_suiveur30_sl40": {"sl": 0.40, "tps": [(0.5, 0.5)], "suiveur": 0.30, "suiveur_des": 1},
 }
 # Stratégie C : convergence KOL (au moins KOL_MIN KOLs différents achètent le même token en moins d'une heure)
 STRATEGIE_C_ACTIVE = False   # arrêtée le 2026-10-10 : micro-tokens, -29 % par trade sur 42 trades (décision de Nils)
@@ -164,6 +169,18 @@ def sauver(nom, obj):
 def ajouter_csv(nom, ligne):
     p = os.path.join(DATA, nom)
     neuf = not os.path.exists(p)
+    if not neuf:
+        with open(p, newline="") as f:
+            ancien = next(csv.reader(f), [])
+        if ancien != list(ligne.keys()):
+            # nouvelles colonnes (ex. nouvelle sortie) : on réécrit le fichier avec l'en-tête complet
+            lignes = list(csv.DictReader(open(p, newline="")))
+            cols = ancien + [k for k in ligne if k not in ancien]
+            with open(p, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=cols)
+                w.writeheader()
+                w.writerows(lignes)
+            ligne = {k: ligne.get(k) for k in cols}
     with open(p, "a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(ligne.keys()))
         if neuf:
@@ -376,13 +393,15 @@ def evaluer(pos, u, maintenant):
         reste, pnl, k, evts, haut = 1.0, 0.0, 0, [], ent
         for x in pts:
             haut = max(haut, x[1])
-            if v.get("suiveur") and k == len(v["tps"]) and reste > 1e-9 and x[1] <= haut * (1 - v["suiveur"]):
+            if v.get("suiveur") and k >= v.get("suiveur_des", len(v["tps"])) and reste > 1e-9 and x[1] <= haut * (1 - v["suiveur"]):
                 g = x[1] / ent - 1
                 evts.append({"t": x[0], "type": "stop suiveur", "part": round(reste, 4), "gain": round(g, 4)})
                 pnl += reste * g; reste = 0; break
-            if x[1] <= ent * (1 - v["sl"]):
+            # « be » : après le 1er palier, le stop remonte au prix d'achat (le trade ne peut plus perdre, hors frais)
+            sl = 0.0 if v.get("be") and k >= 1 else v["sl"]
+            if x[1] <= ent * (1 - sl):
                 # si le prix a sauté par-dessus le stop entre deux relevés (rug), la vente se fait au prix réel, pas au stop
-                g = min(-v["sl"], x[1] / ent - 1)
+                g = min(-sl, x[1] / ent - 1)
                 evts.append({"t": x[0], "type": "stop", "part": round(reste, 4), "gain": round(g, 4)})
                 pnl += reste * g; reste = 0; break
             while k < len(v["tps"]) and x[1] >= ent * (1 + v["tps"][k][0]):
@@ -466,7 +485,7 @@ def tableau_de_bord(positions, fermees, maintenant, n_univ, n_rel, rad=None):
               "nouveau_sommet", "mc_actuel", "retard_min", "antirug")
     trades = [{k: p.get(k) for k in champs} for p in fermees + positions if p["strat"] != "C" or STRATEGIE_C_ACTIVE]
     json.dump({"maj": maintenant, "tokens_suivis": n_univ, "releves": n_rel, "frais": FRAIS,
-               "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"], "suiveur": v.get("suiveur"), "max_h": v.get("max_h", DUREE_MAX_H)}
+               "strategies": STRATEGIES, "sorties": {k: {"sl": v["sl"], "tps": v["tps"], "suiveur": v.get("suiveur"), "suiveur_des": v.get("suiveur_des"), "be": v.get("be"), "max_h": v.get("max_h", DUREE_MAX_H)}
                            for k, v in SORTIES.items()},
                "flux_kol": len(trades_kol(maintenant - 3600)),
                "duree_max_h": DUREE_MAX_H, "trades": trades, "radar": rad or []},
