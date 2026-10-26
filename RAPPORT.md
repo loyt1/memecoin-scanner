@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-26 16:20 UTC)
+# Rapport du scanner (mis à jour le 2026-10-26 16:35 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 2273 (dont 1797 relevés à ce passage). Requêtes : 81 Dexscreener, 1 GeckoTerminal (0 échecs).
+Tokens suivis : 2262 (dont 1799 relevés à ce passage). Requêtes : 81 Dexscreener, 0 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
