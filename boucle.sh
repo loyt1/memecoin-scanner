@@ -21,10 +21,8 @@ git -C data config user.email "scanner-bot@users.noreply.github.com"
 # Dès le début, la session réserve la suivante : elle attend dans la file et démarre dès que celle-ci se termine.
 # (GitHub ne garantit pas les relances programmées.)
 gh workflow run scan.yml --ref main || echo "réservation impossible, la relance horaire prendra le relais"
-# Écoute en continu le flux des trades de KOLs (signaux KOL), pendant toute la session
-python ecoute_kols.py > /tmp/ecoute_kols.log 2>&1 &
-ECOUTE=$!
-trap 'kill $ECOUTE 2>/dev/null; pkill -f kolscan-api 2>/dev/null' EXIT
+# Flux des trades de KOLs : coupé depuis le 23/10 (kolscan est passé derrière une vérification anti-robot Cloudflare,
+# qu'on ne contourne pas). Pour le relancer s'il redevient public : python ecoute_kols.py > /tmp/ecoute_kols.log 2>&1 &
 fin=$(( $(date +%s) + 5 * 3600 + 40 * 60 ))
 n=0
 while [ "$(date +%s)" -lt "$fin" ]; do

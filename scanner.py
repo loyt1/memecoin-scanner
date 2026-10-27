@@ -201,8 +201,10 @@ def decouvrir(univ, maintenant):
             if x.get("chainId") == "solana" and x.get("tokenAddress"):
                 nouveaux.add(x["tokenAddress"])
     # une fois par heure : classements GeckoTerminal (limite de requêtes stricte)
-    if (maintenant // 900) % 4 == 0 or not univ:
-        listes = [f"/networks/solana/dexes/pumpswap/pools?page={p}&sort=h24_volume_usd_desc" for p in range(1, 6)]
+    # toutes les 30 min (avant : toutes les heures) : depuis le 23/10, le flux KOL est bloqué par Cloudflare et ne fait
+    # plus découvrir de tokens, GeckoTerminal compense
+    if (maintenant // 900) % 2 == 0 or not univ:
+        listes = [f"/networks/solana/dexes/pumpswap/pools?page={p}&sort=h24_volume_usd_desc" for p in range(1, 11)]
         listes += [f"/networks/solana/dexes/pumpswap/pools?page={p}&sort=h24_tx_count_desc" for p in (1, 2)]
         listes += [f"/networks/solana/dexes/{d}/pools?page=1&sort=h24_volume_usd_desc"
                    for d in ("meteora-damm-v2", "raydium", "letsbonk-fun", "raydium-launchlab", "meteora")]
