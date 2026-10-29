@@ -1,8 +1,8 @@
-# Rapport du scanner (mis à jour le 2026-10-29 13:38 UTC)
+# Rapport du scanner (mis à jour le 2026-10-29 13:53 UTC)
 
 Paper trading uniquement : aucune vraie transaction.
 
-Tokens suivis : 2111 (dont 1802 relevés à ce passage). Requêtes : 75 Dexscreener, 23 GeckoTerminal (0 échecs).
+Tokens suivis : 2114 (dont 1801 relevés à ce passage). Requêtes : 75 Dexscreener, 1 GeckoTerminal (0 échecs).
 
 ## Résultats par stratégie et par sortie
 
@@ -36,7 +36,7 @@ Référence backtest (2026-10-08, sortie 50_x2_sl60) : B +17 %, G +31 % par trad
 
 | Token | Strat | Entrée (UTC) | MC entrée | Pump | 50/x2 | Haut | Bas | Baleines achat/vente | KOLs A/V | Holders -40 % → entrée | Statut |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [PumpkinBot](https://dexscreener.com/solana/Fo8EVDB3qphm944An9KKWRJi7U1Ft9JurtWd688dFmce) | H | 2026-10-29 13:38 | 0.3 M$ | x3.7 | -3 % | +0 % | 0 % | 2489/5371 $ | 0/0 | 6026 → 4427 | ouverte |
+| [PumpkinBot](https://dexscreener.com/solana/Fo8EVDB3qphm944An9KKWRJi7U1Ft9JurtWd688dFmce) | H | 2026-10-29 13:38 | 0.3 M$ | x3.7 | -56 % | +-53 % | -53 % | 2489/5371 $ | 0/0 | 6026 → 4427 | ouverte |
 | [NOWHEEL](https://dexscreener.com/solana/7YCpK3JYMK89EgWpJPJAh1TaZ8iwiVyLv8j9Hy9Rajmd) | H | 2026-10-27 16:36 | 0.56 M$ | x3.3 | -66 % | +-28 % | -64 % | 2503/2368 $ | 0/0 | 9005 → 9454 | clôturée |
 | [MISTAKE](https://dexscreener.com/solana/867dKvaCcyRrUDP66bqNXbujXfjaxsNB9wTpc4CmBdAD) | H | 2026-10-27 03:36 | 0.46 M$ | x2.5 | -70 % | +-45 % | -67 % | 3375/0 $ | 0/0 | 17501 → 17296 | clôturée |
 | [WEFT](https://dexscreener.com/solana/E5bdE27ATDTeg1ZPNFhjnU5fcVKjccQ5iFZLaX8fscgx) | H | 2026-10-22 17:47 | 0.31 M$ | x3.0 | -65 % | +38 % | -62 % | 3917/9162 $ | 0/0 | 2298 → 2298 | clôturée |
