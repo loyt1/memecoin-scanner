@@ -30,7 +30,9 @@ while [ "$(date +%s)" -lt "$fin" ]; do
   # code à jour (--autostash : rien ne doit bloquer la mise à jour) et données à jour (si quelqu'un a corrigé des données)
   git pull -q --rebase --autostash origin main || true
   git -C data pull -q --rebase --autostash origin data || true
-  python scanner.py || echo "erreur pendant le relevé"
+  # depuis le 30/10 : stratégie 2 (tendance BTC+ETH + short des pumps en marché baissier). L'ancien scanner memecoins
+  # (stratégies B, G, H : toutes perdantes) est arrêté ; son code et ses données restent en archive.
+  python strategie2.py || echo "erreur pendant le relevé"
   git -C data add -A .
   # la copie des données sur Vercel n'est qu'un secours : le site lit la branche data sur GitHub
   n=$((n + 1))
